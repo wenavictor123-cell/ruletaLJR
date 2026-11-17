@@ -1,0 +1,1529 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bitácora 2026: Aplausos, Dinámicas y Juegos</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f8fafc;
+      color: #0f172a;
+      overflow-x: hidden;
+    }
+    @keyframes pointerBounce {
+      0%, 100% { transform: translateX(-50%) rotate(0deg); }
+      50% { transform: translateX(-50%) rotate(-18deg); }
+    }
+    .pointer-tick {
+      animation: pointerBounce 0.12s ease-out;
+    }
+    /* Custom scrollbar */
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: #f1f5f9; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col bg-gradient-to-br from-slate-50 via-indigo-50/30 to-amber-50/30">
+
+  <!-- Confetti Canvas -->
+  <canvas id="confettiCanvas" class="fixed inset-0 pointer-events-none z-50 w-full h-full"></canvas>
+
+  <!-- Header & Stats -->
+  <header class="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-slate-200/80 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+        <!-- Brand -->
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-indigo-600 via-violet-600 to-amber-500 flex items-center justify-center text-white text-2xl shadow-md">
+              🎡
+            </div>
+            <div>
+              <h1 class="text-lg sm:text-xl font-extrabold tracking-tight text-slate-900 leading-tight">
+                Bitácora 2026
+              </h1>
+              <p class="text-xs font-medium text-slate-500">Aplausos, Dinámicas y Juegos</p>
+            </div>
+          </div>
+
+          <!-- Audio Toggle Mobile -->
+          <button id="soundToggleMobile" onclick="toggleSound()" class="md:hidden p-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition" title="Activar/Silenciar sonido">
+            🔊
+          </button>
+        </div>
+
+        <!-- Quick Stats Pills -->
+        <div class="flex flex-wrap items-center gap-2 sm:gap-3">
+          <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 border border-slate-200/70 text-xs sm:text-sm font-semibold text-slate-700">
+            <span>📦 Total:</span>
+            <span class="font-extrabold text-slate-900">150</span>
+          </div>
+          <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 border border-emerald-200 text-xs sm:text-sm font-semibold text-emerald-700">
+            <span>✅ Realizadas:</span>
+            <span id="statCompleted" class="font-extrabold text-emerald-800">0</span>
+          </div>
+          <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-50 border border-amber-200 text-xs sm:text-sm font-semibold text-amber-700">
+            <span>⭐ Mi Lista:</span>
+            <span id="statFavorites" class="font-extrabold text-amber-800">0</span>
+          </div>
+          <button id="soundToggleDesktop" onclick="toggleSound()" class="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs sm:text-sm font-semibold transition" title="Sonido">
+            <span id="soundIcon">🔊</span>
+            <span id="soundLabel">Sonido ON</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <nav class="flex gap-2 mt-3 pt-2 border-t border-slate-100 overflow-x-auto pb-1">
+        <button onclick="switchTab('ruleta')" id="tab-ruleta" class="tab-btn flex-1 sm:flex-none px-4 py-2.5 rounded-xl font-bold text-sm transition flex items-center justify-center gap-2 bg-indigo-600 text-white shadow-sm">
+          <span>🎡</span> <span>Ruleta Interactiva</span>
+        </button>
+        <button onclick="switchTab('catalogo')" id="tab-catalogo" class="tab-btn flex-1 sm:flex-none px-4 py-2.5 rounded-xl font-bold text-sm transition flex items-center justify-center gap-2 bg-slate-100 text-slate-600 hover:bg-slate-200">
+          <span>📚</span> <span>Catálogo (150 Fichas)</span>
+        </button>
+        <button onclick="switchTab('reflexiones')" id="tab-reflexiones" class="tab-btn flex-1 sm:flex-none px-4 py-2.5 rounded-xl font-bold text-sm transition flex items-center justify-center gap-2 bg-slate-100 text-slate-600 hover:bg-slate-200">
+          <span>💭</span> <span>Reflexiones del Grupo</span>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+    <!-- ==================== PESTAÑA 1: RULETA INTERACTIVA ==================== -->
+    <section id="view-ruleta" class="space-y-6">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+        <!-- Left / Center: Wheel Canvas -->
+        <div class="lg:col-span-7 bg-white rounded-3xl shadow-sm border border-slate-200/80 p-4 sm:p-6 flex flex-col items-center">
+          <div class="w-full flex flex-wrap items-center justify-between gap-2 mb-4">
+            <span id="wheelBadge" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-indigo-100 text-indigo-700">
+              🎲 Ruleta Rápida (10 al azar)
+            </span>
+            <button id="shuffleQuickBtn" onclick="reshuffleQuickWheel()" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-violet-100 hover:bg-violet-200 text-violet-800 transition flex items-center gap-1.5">
+              <span>🔀</span> Barajar 10 nuevas
+            </button>
+          </div>
+
+          <!-- Wheel Container -->
+          <div id="wheelContainer" class="relative w-full max-w-[460px] aspect-square flex items-center justify-center my-2 select-none">
+            <!-- Top Pointer -->
+            <div id="wheelPointer" class="absolute -top-3 left-1/2 -translate-x-1/2 z-20 drop-shadow-md origin-top">
+              <svg width="40" height="46" viewBox="0 0 40 46" fill="none">
+                <path d="M20 44L4 12C2.5 8 5.5 3 10 3H30C34.5 3 37.5 8 36 12L20 44Z" fill="#ef4444" stroke="#ffffff" stroke-width="3"/>
+                <circle cx="20" cy="13" r="4" fill="#ffffff"/>
+              </svg>
+            </div>
+
+            <!-- Canvas -->
+            <canvas id="wheelCanvas" class="w-full h-full rounded-full shadow-xl"></canvas>
+
+            <!-- Center Spin Button -->
+            <button id="spinBtn" onclick="spinWheel()" class="absolute z-10 w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-gradient-to-b from-slate-900 to-slate-800 hover:from-indigo-600 hover:to-violet-700 active:scale-95 text-white font-black text-sm sm:text-base tracking-wider shadow-2xl border-4 border-white transition-all flex flex-col items-center justify-center cursor-pointer">
+              <span>¡GIRAR!</span>
+            </button>
+          </div>
+
+          <p class="text-xs text-slate-400 text-center mt-2">
+            Toca <strong>¡GIRAR!</strong> o presiona la barra espaciadora para sortear una actividad.
+          </p>
+        </div>
+
+        <!-- Right: Controls, Winner Preview & Session History -->
+        <div class="lg:col-span-5 space-y-5">
+
+          <!-- Mode & Filters Card -->
+          <div class="bg-white rounded-3xl shadow-sm border border-slate-200/80 p-5 space-y-4">
+            <h2 class="text-base font-extrabold text-slate-900 flex items-center gap-2">
+              <span>⚙️</span> Configuración de la Ruleta
+            </h2>
+
+            <div>
+              <label for="wheelModeSelect" class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">
+                Modo de selección
+              </label>
+              <select id="wheelModeSelect" onchange="changeWheelMode()" class="w-full rounded-2xl border border-slate-300 bg-slate-50 px-3.5 py-2.5 text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                <option value="quick">🎲 Ruleta Rápida (10 al azar)</option>
+                <option value="all">🌈 Todo Mezclado (150 fichas)</option>
+                <option value="aplauso">👏 Solo Aplausos (50)</option>
+                <option value="dinamica">⚡ Solo Dinámicas (50)</option>
+                <option value="juego">🏆 Solo Juegos (50)</option>
+                <option value="favorites">⭐ Mi Lista Personalizada</option>
+              </select>
+            </div>
+
+            <label class="flex items-center gap-3 p-3 rounded-2xl bg-slate-50 border border-slate-200/70 cursor-pointer hover:bg-slate-100/70 transition">
+              <input type="checkbox" id="excludeCompletedChk" onchange="changeWheelMode()" class="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500">
+              <span class="text-sm font-medium text-slate-700">Evitar repetir actividades ya realizadas</span>
+            </label>
+          </div>
+
+          <!-- Last Winner Card -->
+          <div id="lastWinnerCard" class="hidden bg-gradient-to-br from-indigo-600 via-violet-600 to-purple-700 rounded-3xl shadow-md p-5 text-white space-y-3">
+            <div class="flex items-center justify-between">
+              <span id="winnerCatBadge" class="px-2.5 py-1 rounded-full text-xs font-extrabold uppercase bg-white/20 backdrop-blur-sm">
+                🎉 Actividad Seleccionada
+              </span>
+              <span id="winnerNumBadge" class="text-xs font-bold opacity-80">#1</span>
+            </div>
+            <div class="flex items-start gap-3">
+              <div id="winnerIcon" class="text-4xl bg-white/15 p-2.5 rounded-2xl">🎯</div>
+              <div>
+                <h3 id="winnerTitle" class="text-lg font-extrabold leading-snug">Nombre</h3>
+                <p id="winnerObj" class="text-xs text-indigo-100 line-clamp-2 mt-1">Objetivo</p>
+              </div>
+            </div>
+            <div class="pt-1 flex gap-2">
+              <button id="winnerOpenModalBtn" class="flex-1 py-2.5 px-4 rounded-xl bg-white text-indigo-700 hover:bg-indigo-50 font-extrabold text-xs sm:text-sm shadow transition">
+                Ver Ficha Completa
+              </button>
+              <button id="winnerMarkDoneBtn" class="py-2.5 px-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-white font-bold text-xs sm:text-sm shadow transition" title="Marcar como realizada">
+                ✅
+              </button>
+            </div>
+          </div>
+
+          <!-- Session History -->
+          <div class="bg-white rounded-3xl shadow-sm border border-slate-200/80 p-5">
+            <div class="flex items-center justify-between mb-3">
+              <h2 class="text-base font-extrabold text-slate-900 flex items-center gap-2">
+                <span>🕒</span> Historial de la sesión
+              </h2>
+              <div class="flex items-center gap-3">
+                <button onclick="exportSessionHistory()" class="text-xs font-bold text-indigo-600 hover:text-indigo-800 transition">
+                  📋 Exportar
+                </button>
+                <button onclick="clearHistory()" class="text-xs font-semibold text-slate-400 hover:text-rose-600 transition">
+                  Limpiar
+                </button>
+              </div>
+            </div>
+            <div id="sessionHistoryList" class="space-y-2 max-h-60 overflow-y-auto pr-1">
+              <p class="text-xs text-slate-400 italic py-4 text-center">Aún no has girado la ruleta en esta sesión.</p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== PESTAÑA 2: CATÁLOGO (150 FICHAS) ==================== -->
+    <section id="view-catalogo" class="hidden space-y-6">
+      <!-- Search & Filters Bar -->
+      <div class="bg-white rounded-3xl shadow-sm border border-slate-200/80 p-4 sm:p-6 space-y-4">
+        <div class="flex flex-col md:flex-row gap-3">
+          <div class="relative flex-1">
+            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">🔍</span>
+            <input type="text" id="searchInput" oninput="renderCatalog()" placeholder="Buscar por nombre, objetivo o descripción (ej: lluvia, aro, frisbee, círculo)..." class="w-full pl-11 pr-4 py-3 rounded-2xl bg-slate-50 border border-slate-200 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500">
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <button onclick="setCatFilter('all')" id="catFilter-all" class="cat-filter-btn px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-bold bg-slate-900 text-white transition">
+              Todas (150)
+            </button>
+            <button onclick="setCatFilter('aplauso')" id="catFilter-aplauso" class="cat-filter-btn px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-bold bg-indigo-50 text-indigo-700 hover:bg-indigo-100 transition">
+              👏 Aplausos (50)
+            </button>
+            <button onclick="setCatFilter('dinamica')" id="catFilter-dinamica" class="cat-filter-btn px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-bold bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition">
+              ⚡ Dinámicas (50)
+            </button>
+            <button onclick="setCatFilter('juego')" id="catFilter-juego" class="cat-filter-btn px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-bold bg-amber-50 text-amber-800 hover:bg-amber-100 transition">
+              🏆 Juegos (50)
+            </button>
+          </div>
+        </div>
+        <!-- Extra filters (Game Type, Value & Status) -->
+        <div class="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-100">
+          <div id="gameTypeFilterBar" class="hidden flex-wrap items-center gap-2">
+            <span class="text-xs font-bold text-slate-500">Tipo:</span>
+            <button onclick="setGameTypeFilter('all')" id="gt-all" class="gt-btn px-2.5 py-1 rounded-xl text-xs font-bold bg-amber-500 text-white">Todos</button>
+            <button onclick="setGameTypeFilter('I-I')" id="gt-I-I" class="gt-btn px-2.5 py-1 rounded-xl text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200">I-I</button>
+            <button onclick="setGameTypeFilter('I-G')" id="gt-I-G" class="gt-btn px-2.5 py-1 rounded-xl text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200">I-G</button>
+            <button onclick="setGameTypeFilter('G-G')" id="gt-G-G" class="gt-btn px-2.5 py-1 rounded-xl text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200">G-G</button>
+            <button onclick="setGameTypeFilter('E-E')" id="gt-E-E" class="gt-btn px-2.5 py-1 rounded-xl text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200">E-E</button>
+
+            <span class="text-xs font-bold text-slate-500 ml-2">Valor:</span>
+            <select id="gameValueFilterSelect" onchange="setGameValueFilter(this.value)" class="rounded-xl border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-bold text-slate-700 focus:outline-none focus:ring-2 focus:ring-amber-500">
+              <option value="all">Todos los valores</option>
+              <option value="físico">💪 Físico</option>
+              <option value="intelectual">🧠 Intelectual</option>
+              <option value="social">🤝 Social</option>
+              <option value="emocional">💛 Emocional</option>
+            </select>
+          </div>
+
+          <div class="flex items-center gap-2 ml-auto">
+            <button onclick="toggleOnlyFavoritesFilter()" id="onlyFavFilterBtn" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 hover:bg-amber-100 hover:text-amber-800 transition">
+              ⭐ Solo Mi Lista
+            </button>
+            <span id="catalogCountLabel" class="text-xs font-bold text-slate-400">Mostrando 150 fichas</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cards Grid -->
+      <div id="catalogGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+    </section>
+
+    <!-- ==================== PESTAÑA 3: REFLEXIONES DEL GRUPO ==================== -->
+    <section id="view-reflexiones" class="hidden space-y-6">
+      <div class="bg-white rounded-3xl shadow-sm border border-slate-200/80 p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h2 class="text-xl font-extrabold text-slate-900">💭 Reflexiones Finales del Equipo</h2>
+          <p class="text-sm text-slate-500 mt-1">Aprendizajes sobre liderazgo, recreación y trabajo colaborativo en la Bitácora 2026.</p>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <button onclick="openAddReflectionModal()" class="px-4 py-2.5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm shadow-sm transition flex items-center gap-2">
+            <span>➕</span> Agregar Reflexión de Integrante
+          </button>
+          <button onclick="exportReflections()" class="px-4 py-2.5 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-sm transition flex items-center gap-2">
+            <span>📋</span> Copiar Reflexiones
+          </button>
+        </div>
+      </div>
+
+      <div id="reflectionsGrid" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+    </section>
+
+  </main>
+
+  <!-- ==================== MODAL DETALLE DE FICHA ==================== -->
+  <div id="itemModal" class="fixed inset-0 z-40 hidden items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+    <div class="bg-white rounded-3xl max-w-xl w-full shadow-2xl overflow-hidden border border-slate-200 animate-[fadeIn_0.2s_ease-out]">
+      <!-- Top Colored Banner -->
+      <div id="modalHeaderBanner" class="p-6 text-white bg-gradient-to-r from-indigo-600 to-violet-600 relative overflow-hidden">
+        <!-- Ilustración SVG Temática de Fondo -->
+        <div id="modalSvgIllustration" class="absolute right-4 bottom-2 opacity-25 pointer-events-none"></div>
+        <button onclick="closeModal()" class="relative z-10 float-right w-9 h-9 rounded-full bg-black/20 hover:bg-black/30 text-white flex items-center justify-center font-bold transition">
+          ✕
+        </button>
+        <div class="relative z-10 flex items-center gap-2 mb-2">
+          <span id="modalCategoryBadge" class="px-3 py-1 rounded-full text-xs font-extrabold uppercase tracking-wider bg-white/20">
+            Aplauso #1
+          </span>
+        </div>
+        <div class="relative z-10 flex items-center gap-4">
+          <div id="modalIcon" class="text-4xl sm:text-5xl bg-white/20 p-3 rounded-2xl shadow-inner">🎩</div>
+          <h3 id="modalTitle" class="text-xl sm:text-2xl font-black leading-tight">Nombre de la actividad</h3>
+        </div>
+      </div>
+
+      <!-- Body -->
+      <div class="p-6 space-y-4 max-h-[65vh] overflow-y-auto">
+        <div class="bg-slate-50 rounded-2xl p-4 border border-slate-200/70">
+          <h4 class="text-xs font-extrabold uppercase tracking-wider text-slate-400 mb-1">🎯 Objetivo</h4>
+          <p id="modalObjetivo" class="text-sm font-semibold text-slate-800 leading-relaxed"></p>
+        </div>
+
+        <div>
+          <h4 class="text-xs font-extrabold uppercase tracking-wider text-slate-400 mb-1.5">📝 Descripción y Desarrollo</h4>
+          <p id="modalDescripcion" class="text-sm text-slate-700 leading-relaxed whitespace-pre-line"></p>
+        </div>
+
+        <!-- Extra fields for Games -->
+        <div id="modalGameExtra" class="hidden grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+          <div class="bg-amber-50 rounded-2xl p-3.5 border border-amber-200/80">
+            <span class="block text-xs font-extrabold uppercase text-amber-700">💎 Valor del juego</span>
+            <span id="modalValor" class="text-sm font-bold text-slate-800 mt-0.5 block"></span>
+          </div>
+          <div class="bg-orange-50 rounded-2xl p-3.5 border border-orange-200/80">
+            <span class="block text-xs font-extrabold uppercase text-orange-700">🏷️ Tipo de juego</span>
+            <span id="modalTipo" class="text-sm font-bold text-slate-800 mt-0.5 block"></span>
+          </div>
+        </div>
+
+        <!-- Optional Video Link -->
+        <div id="modalVideoBox" class="hidden pt-1">
+          <a id="modalVideoLink" href="#" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-xs sm:text-sm border border-rose-200 transition">
+            <span>▶️</span> Ver video de referencia del ritmo (YouTube)
+          </a>
+        </div>
+      </div>
+
+      <!-- Footer Actions -->
+      <div class="px-6 py-4 bg-slate-50 border-t border-slate-200/80 flex flex-wrap items-center justify-between gap-3">
+        <div class="flex items-center gap-2">
+          <button id="modalToggleDoneBtn" class="px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition flex items-center gap-1.5 bg-slate-200 text-slate-700">
+            ✅ Marcar Realizada
+          </button>
+          <button id="modalToggleFavBtn" class="px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition flex items-center gap-1.5 bg-slate-200 text-slate-700">
+            ⭐ Mi Lista
+          </button>
+        </div>
+        <button onclick="closeModal()" class="px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs sm:text-sm transition ml-auto">
+          Cerrar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL AGREGAR REFLEXIÓN ==================== -->
+  <div id="reflectionModal" class="fixed inset-0 z-40 hidden items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+    <div class="bg-white rounded-3xl max-w-lg w-full shadow-2xl overflow-hidden border border-slate-200">
+      <div class="p-6 bg-gradient-to-r from-indigo-600 to-violet-600 text-white flex items-center justify-between">
+        <h3 class="text-lg font-extrabold">✍️ Nueva Reflexión de Integrante</h3>
+        <button onclick="closeReflectionModal()" class="w-8 h-8 rounded-full bg-black/20 hover:bg-black/30 flex items-center justify-center font-bold">✕</button>
+      </div>
+      <form onsubmit="saveNewReflection(event)" class="p-6 space-y-4">
+        <div>
+          <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Nombre del Integrante</label>
+          <input type="text" id="refNameInput" required placeholder="Ej: Camila Rojas" class="w-full rounded-2xl border border-slate-300 px-4 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        </div>
+        <div>
+          <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Reflexión Final</label>
+          <textarea id="refTextInput" rows="5" required placeholder="Escribe aquí tu reflexión sobre el ramo Liderazgo, Juegos y Recreación..." class="w-full rounded-2xl border border-slate-300 px-4 py-3 text-sm leading-relaxed focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
+        </div>
+        <div class="flex justify-end gap-2 pt-2">
+          <button type="button" onclick="closeReflectionModal()" class="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-sm">Cancelar</button>
+          <button type="submit" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm shadow">Guardar Reflexión</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="fixed bottom-5 right-5 z-50 hidden px-4 py-3 rounded-2xl bg-slate-900 text-white text-sm font-bold shadow-xl transition-all"></div>
+
+  <script>
+    // =========================================================================
+    // BASE DE DATOS COMPLETA: 150 FICHAS (50 APLAUSOS, 50 DINÁMICAS, 50 JUEGOS)
+    // =========================================================================
+    const BITACORA_DATA = [
+      // ==================== APLAUSOS (1-50) ====================
+      { id: 'ap-1', numero: 1, categoria: 'aplauso', icono: '🎩', nombre: 'Gorro', objetivo: 'Fomentar la atención visual, la reacción colectiva y romper el hielo.', descripcion: 'Una persona tiene un gorro que lanza al aire; mientras permanezca en el aire, las demás personas aplaudirán continuamente hasta que lo atrape o toque el suelo.' },
+      { id: 'ap-2', numero: 2, categoria: 'aplauso', icono: '🌊', nombre: 'Ola', objetivo: 'Fomentar la expresión creativa y romper el hielo.', descripcion: 'Se forma un círculo con todos los participantes, y a la cuenta de 3 todos aplauden de forma secuencial levantando los brazos, formando una ola como en los estadios.' },
+      { id: 'ap-3', numero: 3, categoria: 'aplauso', icono: '🌧️', nombre: 'Aplauso de la Lluvia', objetivo: 'Fomentar la coordinación y participación grupal.', descripcion: 'Se forma un círculo con todas las personas, se elige un guía y todos deben seguir la intensidad del aplauso según indique con sus dedos:\n- 1 Dedo: Gotas de lluvia\n- 2 Dedos: Llovizna\n- 3 Dedos: Casi lluvia\n- 4 Dedos: Lluvia\n- 5 Dedos: Tormenta' },
+      { id: 'ap-4', numero: 4, categoria: 'aplauso', icono: '🚂', nombre: 'Aplauso del Tren', objetivo: 'Fomentar la expresión creativa, ideal para romper el hielo.', descripcion: 'Se divide al grupo en dos. Existe un guía que actúa como conductor del tren; simula mover la palanca, señala a uno de los grupos y estos aplauden una vez, luego señala al otro grupo y aplauden. Si hace el gesto de tocar la campana, todos dicen "¡Chu Chu!".' },
+      { id: 'ap-5', numero: 5, categoria: 'aplauso', icono: '🏟️', nombre: 'Aplauso del Estadio', objetivo: 'Fomentar la expresión creativa, ideal para romper el hielo.', descripcion: 'Se elige un guía que menciona una categoría y todos deben aplaudir según corresponda:\n1. Palco (aplausos de baja intensidad y elegantes)\n2. Tribuna (aplausos eufóricos)\n3. Galería (aplausos, gritos y gestos).' },
+      { id: 'ap-6', numero: 6, categoria: 'aplauso', icono: '📣', nombre: '1, 2, 3 ¡Uuuh!', objetivo: 'Romper el hielo en un grupo.', descripcion: 'Se aplaude una vez, luego dos veces, luego tres veces y finalmente todos gritan "¡Uuuuh!". Se repite aumentando progresivamente la velocidad.' },
+      { id: 'ap-7', numero: 7, categoria: 'aplauso', icono: '🌭', nombre: 'Aplauso Completo Copec', objetivo: 'Romper el hielo y desinhibir al grupo.', descripcion: 'Se hace un círculo y por turnos cada uno dará una vuelta completa sobre sí mismo (simulando que es una salchicha calentándose) y luego de girar aplaudirá; después le toca a la persona de su derecha.' },
+      { id: 'ap-8', numero: 8, categoria: 'aplauso', icono: '🗣️', nombre: 'Eco', objetivo: 'Fomentar la expresión creativa y la coordinación.', descripcion: 'Se asigna a una persona que irá aplaudiendo a su propio ritmo; inmediatamente después de cada secuencia, los demás integrantes deberán copiar exactamente el mismo ritmo.' },
+      { id: 'ap-9', numero: 9, categoria: 'aplauso', icono: '🧮', nombre: 'Matemático', objetivo: 'Trabajar la coordinación rítmica y la concentración.', descripcion: 'Se aplaude siguiendo la secuencia rítmica de percusión corporal y palmas del video de referencia.' , videoUrl: 'https://www.youtube.com/watch?v=VrkzrRSZ5lo' },
+      { id: 'ap-10', numero: 10, categoria: 'aplauso', icono: '✖️', nombre: 'Matemático Cruzado', objetivo: 'Trabajar la coordinación bilateral y la disociación motriz.', descripcion: 'Se aplaude siguiendo el ritmo del aplauso Matemático, pero con la particularidad de que antes de cada aplauso se cruzan los brazos frente al pecho.', videoUrl: 'https://www.youtube.com/watch?v=VrkzrRSZ5lo' },
+      { id: 'ap-11', numero: 11, categoria: 'aplauso', icono: '⏩', nombre: 'Cámara Lenta - Cámara Rápida', objetivo: 'Fomentar la coordinación y mejorar la atención de un grupo.', descripcion: 'Primero se hacen tres aplausos en cámara lenta exagerada (con gestos amplios), luego 3 aplausos a velocidad normal y por último 3 aplausos en cámara súper rápida.' },
+      { id: 'ap-12', numero: 12, categoria: 'aplauso', icono: '🌱', nombre: 'Aplauso Semilla', objetivo: 'Fomentar la coordinación corporal y creatividad mediante un gesto progresivo.', descripcion: 'Todos se agachan simulando ser una semilla bajo tierra; luego empiezan a "crecer" suavemente mientras frotan sus manos y, al estirarse completamente hacia arriba, dan un gran aplauso final.' },
+      { id: 'ap-13', numero: 13, categoria: 'aplauso', icono: '🐍', nombre: 'Aplauso Serpiente', objetivo: 'Estimular la coordinación grupal, atención y participación mediante movimientos fluidos.', descripcion: 'Con las palmas juntas, todos mueven los brazos en zigzag haciendo "sss..." como una serpiente; cuando el guía da la señal, todos dan un aplauso largo y sostenido, terminando con un "shhh" grupal.' },
+      { id: 'ap-14', numero: 14, categoria: 'aplauso', icono: '🏀', nombre: 'Aplauso Básquetbol', objetivo: 'Fomentar la coordinación grupal y la atención visual.', descripcion: 'Se eligen dos personas: una hará de jugador de básquetbol y otra de aro con los brazos en círculo. El jugador simula dar botes a un balón y cada vez que bota, el grupo aplaude; al final lanza y encesta.' },
+      { id: 'ap-15', numero: 15, categoria: 'aplauso', icono: '🏓', nombre: 'Aplauso Ping Pong', objetivo: 'Favorecer la coordinación grupal, atención a señales y agilidad rítmica alternada.', descripcion: 'Se divide al grupo en dos equipos: "Ping" y "Pong". Un grupo aplaude a la vez y dice "Ping", y el otro responde aplaudiendo y diciendo "Pong". El animador va acelerando el intercambio.' },
+      { id: 'ap-16', numero: 16, categoria: 'aplauso', icono: '🥁', nombre: 'Aplauso Redoble', objetivo: 'Mejorar la coordinación rítmica, atención auditiva y sincronización grupal.', descripcion: '1. Todos frotan las manos suave como un redoble de tambor.\n2. El guía levanta la mano lentamente y el redoble aumenta de intensidad.\n3. Cuando el guía baja la mano bruscamente, todos dan un único y gran aplauso final.' },
+      { id: 'ap-17', numero: 17, categoria: 'aplauso', icono: '📸', nombre: 'Aplauso Fotografía', objetivo: 'Desarrollar la sincronización grupal y atención a señales auditivas.', descripcion: '1. Todos hacen una pose fija mirando al fotógrafo (persona elegida).\n2. El fotógrafo dice "¡Foto!".\n3. Todos realizan un único aplauso sincronizado al unísono como si fuera el disparo del flash.' },
+      { id: 'ap-18', numero: 18, categoria: 'aplauso', icono: '🙇', nombre: 'Aplauso Japonés', objetivo: 'Desarrollar la atención y capacidad de seguir instrucciones.', descripcion: 'Todos juntan las palmas frente al pecho y hacen una reverencia respetuosa. Luego dan dos palmadas secas y exclaman "¡Hai!". El animador puede variar la velocidad.' },
+      { id: 'ap-19', numero: 19, categoria: 'aplauso', icono: '🍔', nombre: 'Aplauso de la Hamburguesa', objetivo: 'Fomentar la creatividad y el humor en el grupo.', descripcion: 'Todos simulan armar una hamburguesa gigante entre las manos: primero aplauden suavemente para representar el pan, luego más fuerte para la carne y finalmente dan una gran palmada gritando "¡Ñam!".' },
+      { id: 'ap-20', numero: 20, categoria: 'aplauso', icono: '🎣', nombre: 'Aplauso del Pescador', objetivo: 'Trabajar la coordinación y la imaginación colectiva.', descripcion: 'Todos simulan lanzar una caña de pescar y esperar en silencio. Cuando el animador grita "¡Mordió!", todos tiran de la caña imaginaria y dan tres palmadas mientras dicen "¡Lo tengo!".' },
+      { id: 'ap-21', numero: 21, categoria: 'aplauso', icono: '👑', nombre: 'Aplauso del Rey', objetivo: 'Desarrollar la expresión teatral y la participación grupal.', descripcion: 'Todos levantan una mano sobre la cabeza simulando llevar una corona y saludan con elegancia como reyes y reinas. Después dan tres palmadas y gritan "¡Larga vida al rey!".' },
+      { id: 'ap-22', numero: 22, categoria: 'aplauso', icono: '⌨️', nombre: 'Aplauso de la Máquina de Escribir', objetivo: 'Mejorar la coordinación fina y la concentración.', descripcion: 'Todos simulan escribir rápidamente en una máquina de escribir antigua moviendo los dedos en el aire. Cuando el animador dice "¡Campanita!", todos dan una palmada y hacen el gesto de correr el carro.' },
+      { id: 'ap-23', numero: 23, categoria: 'aplauso', icono: '👨‍🍳', nombre: 'Aplauso del Cocinero', objetivo: 'Estimular la creatividad y la participación activa.', descripcion: 'El animador hace como si cocinara en una gran olla y todos simulan revolver con una cuchara gigante. Cuando dice "¡Está listo!", dan tres palmadas y gritan "¡Buen provecho!".' },
+      { id: 'ap-24', numero: 24, categoria: 'aplauso', icono: '🍲', nombre: 'Aplauso la Cazuela', objetivo: 'Estimular la creatividad y desarrollar la coordinación.', descripcion: 'El grupo se junta al centro y cada uno simula ser un ingrediente de la cazuela, aplaudiendo y diciendo su ingrediente. Cuando el animador dice "¡Está lista la cazuela!", todos aplauden tres veces y gritan "¡A comer!".' },
+      { id: 'ap-25', numero: 25, categoria: 'aplauso', icono: '🌬️', nombre: 'Aplauso Ventisca', objetivo: 'Trabajar la atención a cambios de intensidad y capacidad de reacción.', descripcion: 'Se frotan las manos creando un sonido suave de viento; el guía indica niveles (suave, medio o fuerte) y al decir "¡Ventisca!", todos aplauden lo más rápido posible durante 3 segundos.' },
+      { id: 'ap-26', numero: 26, categoria: 'aplauso', icono: '🏍️', nombre: 'Aplauso del Motociclista', objetivo: 'Fomentar la energía y la expresión corporal mediante sonidos cotidianos.', descripcion: 'Todos simulan encender una motocicleta dando una patada al suelo, aceleran girando el puño derecho haciendo "¡Bruuum, bruuum!" y aplauden fuertemente simulando el escape.' },
+      { id: 'ap-27', numero: 27, categoria: 'aplauso', icono: '🕰️', nombre: 'Aplauso del Reloj', objetivo: 'Desarrollar la atención al ritmo grupal y la sincronización auditiva.', descripcion: 'El grupo imita el péndulo de un reloj gigante haciendo "Tic, tac" alternadamente y moviendo la cabeza o manos de lado a lado. Al llegar a la hora en punto, dan una gran palmada gritando "¡BUM!".' },
+      { id: 'ap-28', numero: 28, categoria: 'aplauso', icono: '🦍', nombre: 'Aplauso de Tarzán', objetivo: 'Liberar tensiones, estimular el humor y la participación expresiva.', descripcion: 'Todos se golpean suavemente el pecho con las manos simulando un gorila mientras emiten el clásico grito de Tarzán, cerrando la acción con un aplauso unísono al aire.' },
+      { id: 'ap-29', numero: 29, categoria: 'aplauso', icono: '🐎', nombre: 'Aplauso del Caballo', objetivo: 'Mejorar la coordinación rítmica y la concentración colectiva.', descripcion: 'Los participantes simulan el trote de un caballo golpeando levemente sus muslos con las manos de forma rítmica (ta-tán, ta-tán) y terminan dando un aplauso seco imitando el relincho.' },
+      { id: 'ap-30', numero: 30, categoria: 'aplauso', icono: '✈️', nombre: 'Aplauso del Avión', objetivo: 'Promover la dinámica corporal y la cohesión mediante una acción coordinada.', descripcion: 'Todos extienden los brazos como alas de avión. El guía simula el despegue con un sonido ascendente ("Shhhhh") y, al alcanzar la altura máxima, todos dan una gran palmada fuerte.' },
+      { id: 'ap-31', numero: 31, categoria: 'aplauso', icono: '😂', nombre: 'Aplauso de la Risa', objetivo: 'Romper el hielo, generar confianza y relajar a los participantes.', descripcion: 'El grupo comienza a aplaudir mientras finge una risa contagiosa y exagerada ("ja, ja, ja", luego "ji, ji, ji") que sube de volumen hasta culminar en un aplauso general y carcajadas.' },
+      { id: 'ap-32', numero: 32, categoria: 'aplauso', icono: '🚪', nombre: 'Aplauso de la Puerta Mágica', objetivo: 'Estimular la imaginación y la creatividad corporal mediante dramatización breve.', descripcion: 'Todos imitan girar una manilla y abrir una puerta muy pesada. Al abrirla imaginariamente, dan una palmada fuerte y dicen "¡Sorpresa!".' },
+      { id: 'ap-33', numero: 33, categoria: 'aplauso', icono: '🫧', nombre: 'Aplauso del Chicle', objetivo: 'Desarrollar la atención y respuesta rápida a estímulos auditivos del líder.', descripcion: 'Todos simulan estirar un chicle gigante separando lentamente las manos y, cuando el animador dice "¡Se reventó!", todos dan una fuerte palmada al centro.' },
+      { id: 'ap-34', numero: 34, categoria: 'aplauso', icono: '🚒', nombre: 'Aplauso del Bombero', objetivo: 'Fomentar la coordinación motriz grupal y la diversión dinámica.', descripcion: 'El grupo simula bombear agua con una palanca de arriba a abajo y, al grito de "¡Apagado!", todos dan tres aplausos rápidos.' },
+      { id: 'ap-35', numero: 35, categoria: 'aplauso', icono: '🌊', nombre: 'Aplauso de la Ola Gigante', objetivo: 'Trabajar el control de la intensidad sonora y la coordinación progresiva.', descripcion: 'Comienza abajo con un susurro ("shhh") y las manos cerca del suelo, subiendo progresivamente hasta levantar los brazos y dar un aplauso seco arriba.' },
+      { id: 'ap-36', numero: 36, categoria: 'aplauso', icono: '📱', nombre: 'Aplauso del Teléfono Celular', objetivo: 'Integrar elementos cotidianos para romper el hielo de forma lúdica.', descripcion: 'Todos simulan marcar un número en el aire y contestar diciendo "¡Aló!". Inmediatamente después, dan dos aplausos seguidos simulando el tono de colgar.' },
+      { id: 'ap-37', numero: 37, categoria: 'aplauso', icono: '🧹', nombre: 'Aplauso de la Escoba', objetivo: 'Promover la expresión corporal simétrica y el trabajo sincronizado.', descripcion: 'Todos simulan barrer el suelo con energía y, al terminar de juntar la basura imaginaria en un punto, dan una gran palmada como señal de tarea cumplida.' },
+      { id: 'ap-38', numero: 38, categoria: 'aplauso', icono: '⛈️', nombre: 'Aplauso de Truenos y Rayos', objetivo: 'Estimular la progresión sensorial y la gradación de energía grupal.', descripcion: 'El grupo frota las manos (viento), chasquea los dedos (lluvia menuda), golpea los muslos (tormenta) y culmina con un aplauso estruendoso y un grito corto (el trueno).' },
+      { id: 'ap-39', numero: 39, categoria: 'aplauso', icono: '🐸', nombre: 'Aplauso del Sapo', objetivo: 'Favorecer la activación física inicial y la expresión lúdica corporal.', descripcion: 'Los participantes imitan el salto de un sapo doblando las rodillas y, al caer al suelo tras el salto, dan una palmada fuerte imitando el golpe.' },
+      { id: 'ap-40', numero: 40, categoria: 'aplauso', icono: '🔬', nombre: 'Aplauso del Microscopio', objetivo: 'Estimular la concentración, la curiosidad y la expresión gestual.', descripcion: 'Todos simulan ajustar la lente de un microscopio frente a sus ojos, miran fijamente y, al descubrir algo increíble, dan una palmada de asombro diciendo "¡Eureka!".' },
+      { id: 'ap-41', numero: 41, categoria: 'aplauso', icono: '🏹', nombre: 'Aplauso del Arquero', objetivo: 'Fomentar la coordinación visomotora y la concentración enfocada.', descripcion: 'Los participantes simulan tomar un arco, colocar una flecha imaginaria, tensar la cuerda hacia atrás y, al soltarla, dar un aplauso seco imitando el impacto en el blanco.' },
+      { id: 'ap-42', numero: 42, categoria: 'aplauso', icono: '📷', nombre: 'Aplauso del Fotógrafo Veloz', objetivo: 'Desarrollar la reacción rápida y la atención milimétrica a la señal.', descripcion: 'Todos imitan sostener una cámara antigua con flash de magnesio, presionan el botón y dan un aplauso seco y único acompañado de un parpadeo general.' },
+      { id: 'ap-43', numero: 43, categoria: 'aplauso', icono: '🎼', nombre: 'Aplauso del Director de Orquesta', objetivo: 'Mejorar la capacidad de respuesta visual y la sintonía fina con un líder.', descripcion: 'El guía mueve las manos en el aire como director: si los mueve despacio, el grupo aplaude despacio y suave; si los mueve rápido y con energía, el grupo aplaude fuerte y acelerado.' },
+      { id: 'ap-44', numero: 44, categoria: 'aplauso', icono: '👻', nombre: 'Aplauso del Fantasma', objetivo: 'Desinhibir al grupo mediante la representación de personajes divertidos.', descripcion: 'Todos mueven las manos de manera ondulada frente a sí mismos emitiendo un sonido suave ("Uuuuu") y finalizan dando un aplauso repentino y gritando "¡Jua, jua!".' },
+      { id: 'ap-45', numero: 45, categoria: 'aplauso', icono: '🖨️', nombre: 'Aplauso de la Fotocopiadora', objetivo: 'Estimular la memoria auditiva y la precisión rítmica colectiva.', descripcion: 'Una persona hace un ritmo corto de aplausos (ej. dos aplausos y un chasquido) y el resto del grupo debe copiar exactamente el mismo patrón de inmediato.' },
+      { id: 'ap-46', numero: 46, categoria: 'aplauso', icono: '🪄', nombre: 'Aplauso del Cohete Espacial / Mago', objetivo: 'Fomentar la expectación grupal, el conteo y la energía sincronizada.', descripcion: 'Todos simulan sacar un sombrero de copa imaginario, agitan una varita mágica en el aire haciendo círculos y, al decir "¡Abra cadabra!", dan una gran palmada final.' },
+      { id: 'ap-47', numero: 47, categoria: 'aplauso', icono: '🚰', nombre: 'Aplauso de la Llave de Agua', objetivo: 'Desarrollar el control rítmico progresivo y la atención grupal.', descripcion: 'Todos simulan abrir una llave de lavatorio. El sonido de las palmas comienza goteando lentamente ("plop... plop...") hasta convertirse en un flujo continuo de aplausos rápidos.' },
+      { id: 'ap-48', numero: 48, categoria: 'aplauso', icono: '🐙', nombre: 'Aplauso del Pulpo', objetivo: 'Favorecer la libertad de movimiento corporal, flexibilidad e integración.', descripcion: 'Todos mueven los brazos en todas direcciones imitando los tentáculos flexibles de un pulpo y, a la señal del guía, juntan las manos al centro para dar un aplauso general.' },
+      { id: 'ap-49', numero: 49, categoria: 'aplauso', icono: '🏆', nombre: 'Aplauso del Campeón', objetivo: 'Elevar la motivación, el sentido de logro y el reconocimiento positivo.', descripcion: 'Todos simulan colocarse un cinturón de campeón o levantar un trofeo sobre la cabeza, exclamando "¡Campeones!" y dando tres aplausos eufóricos al mismo tiempo.' },
+      { id: 'ap-50', numero: 50, categoria: 'aplauso', icono: '🔎', nombre: 'Aplauso del Detective', objetivo: 'Estimular la concentración, la observación minuciosa y la atención auditiva.', descripcion: 'Todos simulan sostener una lupa imaginaria frente a un ojo buscando pistas. Cuando el animador dice "¡Encontrado!", todos dan dos palmadas secas exclamando "¡Ajá!".' },
+
+      // ==================== DINÁMICAS (1-50) ====================
+      { id: 'di-1', numero: 1, categoria: 'dinamica', icono: '🎶', nombre: 'Aram sam sam', objetivo: 'Fomentar la coordinación rítmica, la desinhibición y el contacto amistoso en grupo.', descripcion: 'Se canta "Aram sam sam, guri guri guri, arabi". Con "Aram" se abren y cierran los puños, con "Guri" se rascan las mejillas y con "Arabi" se dibujan semicírculos en el aire. En parejas, en "Guri" se rascan las mejillas al compañero y en "Arabi" se le desordena suavemente el pelo.' },
+      { id: 'di-2', numero: 2, categoria: 'dinamica', icono: '👌', nombre: 'Larailailero', objetivo: 'Desarrollar la motricidad fina, la concentración y la sincronización en parejas.', descripcion: 'Cada persona junta el dedo medio con el pulgar y mueve los índices al ritmo de "Larai lai lero, lero la". Se hace en círculo y en parejas. La dificultad aumenta incorporando aplausos u ojos cerrados.' },
+      { id: 'di-3', numero: 3, categoria: 'dinamica', icono: '🧸', nombre: 'Osito', objetivo: 'Promover el afecto grupal, la expresión corporal y un clima de confianza.', descripcion: 'Se canta "Tilín tilón, osito regalón... te doy mi corazón". En el 1° y 3° verso se juntan las manos y en el 2° y 4° se hace el gesto de mecer. Al terminar el último verso se forma un corazón con las manos al frente.' },
+      { id: 'di-4', numero: 4, categoria: 'dinamica', icono: '🤴', nombre: 'El noble duque Juan', objetivo: 'Estimular la disociación motora y la atención a consignas musicales.', descripcion: 'Al ritmo de la canción del noble duque Juan, que sube y baja el camino, se suben o bajan las manos según la letra. Incluye variantes de pie o sentado, o invirtiendo los brazos cuando dice "sube".' },
+      { id: 'di-5', numero: 5, categoria: 'dinamica', icono: '🚢', nombre: 'El arca de Noé', objetivo: 'Fomentar la expresión corporal, el humor y la participación activa.', descripcion: 'Se canta una canción sobre Noé y su arca realizando las mímicas de cada animal (cocodrilo, orangután, serpiente, águila real, conejo, topo y elefante) y al final se apunta a un compañero.' },
+      { id: 'di-6', numero: 6, categoria: 'dinamica', icono: '👍', nombre: 'Palo bonito', objetivo: 'Ejercitar la coordinación digital y la agilidad mental siguiendo un ritmo creciente.', descripcion: 'Se canta "Palo, palo, palito, palo, eh" al ritmo de la canción. Al decir "palo" se levanta el dedo índice, en "palito" se levanta el meñique y en "eh" se hace un pulgar arriba ("like").' },
+      { id: 'di-7', numero: 7, categoria: 'dinamica', icono: '🕳️', nombre: 'El hoyo en la mar', objetivo: 'Estimular la memoria secuencial y el ritmo colectivo.', descripcion: 'Canción acumulativa que parte con "Hay un hoyo en el fondo de la mar". Se van integrando elementos uno a uno (palo, clavo, hilo, nudo, dedo, uña, mano) y cada vuelta termina con 3 aplausos.' },
+      { id: 'di-8', numero: 8, categoria: 'dinamica', icono: '🍋', nombre: 'Limón', objetivo: 'Desarrollar la agilidad mental, la atención sostenida y la memoria numérica.', descripcion: 'A cada persona se le asigna un número de limones. Se dice "un limón, medio limón, X limones". La persona con ese número continúa el canto con su número y llama a otro participante.' },
+      { id: 'di-9', numero: 9, categoria: 'dinamica', icono: '🚂', nombre: 'El pistón', objetivo: 'Activar físicamente al grupo mediante movimientos alternados coordinados.', descripcion: 'Se canta "Es el pistón, pistón, pistón, lo que hace andar a la máquina... al vagón". Cada vez que se menciona "pistón", un grupo se sienta y el otro se pone de pie de forma alternada.' },
+      { id: 'di-10', numero: 10, categoria: 'dinamica', icono: '🧢', nombre: 'Chavo del 8', objetivo: 'Mejorar los reflejos, la atención rítmica y la concentración grupal.', descripcion: 'En círculo, cada uno pone su mano derecha sobre la izquierda de su compañero de al lado. Se pasan el aplauso contando del 1 al 8; a quien le toca el 8 debe quitar la mano antes de recibir la palmada.' },
+      { id: 'di-11', numero: 11, categoria: 'dinamica', icono: '🍝', nombre: 'Un tallarín', objetivo: 'Desinhibir al grupo mediante el baile, el humor y la expresión corporal.', descripcion: 'En círculo se baila cantando: "Yo tengo un tallarín" (salto con medio giro), "que se mueve por aquí y por allá" (brazos a los lados), "todo pegoteado" (manos en el vientre), "con un poco de aceite y sal" (agitar manos) "y sales a bailar".' },
+      { id: 'di-12', numero: 12, categoria: 'dinamica', icono: '🦆', nombre: 'Mamá pato', objetivo: 'Promover la sincronización grupal y la coordinación de desplazamientos.', descripcion: 'En círculo cantan al ritmo: en "Ahí viene mamá pato - pachi" dan un paso a la derecha; en "Ahí viene papá pato - pachi", un paso a la izquierda; y con los patitos dan 3 pasos cortitos.' },
+      { id: 'di-13', numero: 13, categoria: 'dinamica', icono: '🧼', nombre: 'La mansa goma', objetivo: 'Liberar tensiones vocales y corporales mediante la exageración lúdica.', descripcion: 'Al ritmo de "Yo quiero tener una goma así, que limpie mis cuadernos... la mansa goma", cada vez se canta más fuerte (especialmente en el "aaa") haciendo la mímica de una goma cada vez más gigante.' },
+      { id: 'di-14', numero: 14, categoria: 'dinamica', icono: '🐻', nombre: 'Uyuyuy', objetivo: 'Fomentar la imaginación, la expresión sonora y la memoria de secuencias.', descripcion: 'Se canta "Uyuyuy, ¡qué veo, qué feo! ¡Un [lugar]! No puedo pasar por la derecha ni por la izquierda, paso por el medio" haciendo sonidos de cada lugar. Al llegar a una cueva con un oso, escapan repitiendo todos los sonidos.' },
+      { id: 'di-15', numero: 15, categoria: 'dinamica', icono: '🐘', nombre: 'Un elefante', objetivo: 'Integrar progresivamente a todos los participantes en una dinámica colectiva.', descripcion: 'Se canta "Un elefante se balanceaba sobre la tela de una araña...". Uno hace la mímica del elefante y los demás aplauden; al terminar cada estrofa se suma otro compañero hasta formar una gran hilera.' },
+      { id: 'di-16', numero: 16, categoria: 'dinamica', icono: '🤪', nombre: 'Yo tengo un tic', objetivo: 'Estimular la creatividad motriz y la imitación grupal.', descripcion: 'En círculo, el animador canta "Yo tengo un tic, tic, tic, y el médico me dijo que mueva una mano" y todos lo imitan. Luego otro participante repite sumando un nuevo movimiento corporal.' },
+      { id: 'di-17', numero: 17, categoria: 'dinamica', icono: '🐸', nombre: 'La familia sapo', objetivo: 'Favorecer la desinhibición y el sentido del humor en grupo.', descripcion: 'En círculo cantan y repiten: "Era la familia sapo, estaba el padre sapo, sapa sapa sapa saa", haciendo un gesto divertido. Luego se agrega a la madre, al hijo, etc., con nuevos gestos y voces.' },
+      { id: 'di-18', numero: 18, categoria: 'dinamica', icono: '⚽', nombre: 'Pelota preguntona', objetivo: 'Facilitar la presentación personal y el conocimiento mutuo entre integrantes.', descripcion: 'En círculo se pasa una pelota rápidamente. Cuando el animador dice "¡Alto!", quien tiene la pelota dice su nombre y qué le gusta hacer en sus ratos libres.' },
+      { id: 'di-19', numero: 19, categoria: 'dinamica', icono: '⏰', nombre: 'Reloj de pared', objetivo: 'Trabajar la concentración auditiva y la disociación rítmica entre subgrupos.', descripcion: 'Se divide al grupo en dos: uno canta "Tic-tac, tic-tac" a un ritmo constante y el otro canta "Ding-dong, ding-dong" a un ritmo distinto, manteniendo ambos tiempos sin confundirse.' },
+      { id: 'di-20', numero: 20, categoria: 'dinamica', icono: '📰', nombre: 'Mi cuerpo', objetivo: 'Fomentar el esquema corporal, la creatividad y la rapidez de respuesta.', descripcion: 'Cada participante tiene una hoja de periódico en el suelo. El animador hace preguntas sobre partes del cuerpo (ej. "¿Cuál es tu parte favorita?") y todos responden apoyando esa parte sobre el diario.' },
+      { id: 'di-21', numero: 21, categoria: 'dinamica', icono: '🚶', nombre: 'Don Matías', objetivo: 'Promover la cohesión grupal y el humor mediante el canto dialogado.', descripcion: 'Caminando en círculo cantan: "¿Usted conoce a don Matías, al que lo ha pisado un tren? / No señor... / ¡Le quedó la pierna así!". En cada repetición imitan nuevas posturas acumuladas.' },
+      { id: 'di-22', numero: 22, categoria: 'dinamica', icono: '🏠', nombre: 'Yo tengo una casita', objetivo: 'Desarrollar la modulación de voz y la amplitud del movimiento corporal.', descripcion: 'Se canta "Yo tengo una casita, así, así; toco la puertita, abro la ventana, y por la chimenea sale el humo" haciendo las mímicas, aumentando en cada ronda el tamaño de la casa y el volumen de la voz.' },
+      { id: 'di-23', numero: 23, categoria: 'dinamica', icono: '💦', nombre: 'Pato al agua', objetivo: 'Ejercitar la atención verbal y la agilidad mental en cadena.', descripcion: 'Ubicados en círculo, siguen la secuencia por turnos: "Pato, pata, pata, pum, al agua". En la siguiente vuelta se añade un pato más ("dos patos, cuatro patas, pum, pum, al agua, al agua").' },
+      { id: 'di-24', numero: 24, categoria: 'dinamica', icono: '🥔', nombre: 'La papa caliente', objetivo: 'Activar la velocidad de reacción y generar un ambiente distendido.', descripcion: 'En círculo rotan una pelota mientras el animador de espaldas repite "papa caliente". Al gritar "¡Se quemó!", quien tiene el objeto acumula una marca; al juntar dos, realiza una penitencia divertida.' },
+      { id: 'di-25', numero: 25, categoria: 'dinamica', icono: '🐄', nombre: 'Las vacas vuelan', objetivo: 'Entrenar la atención selectiva y el control inhibitorio ante estímulos engañosos.', descripcion: 'Todos ponen sus manos palma con palma. Cuando el guía nombra un animal que realmente vuela, dan una palmada; si nombra uno que no vuela (ej. "¡Las vacas vuelan!"), deben quedarse quietos.' },
+      { id: 'di-26', numero: 26, categoria: 'dinamica', icono: '🛡️', nombre: 'El escudo', objetivo: 'Fomentar el autoconocimiento y el reconocimiento positivo entre compañeros.', descripcion: 'Cada participante recibe un papel con forma de escudo donde escribe sus principales cualidades o valores personales. Luego se mezclan y otra persona del grupo los lee en voz alta.' },
+      { id: 'di-27', numero: 27, categoria: 'dinamica', icono: '🐠', nombre: 'La pecera', objetivo: 'Facilitar el diálogo fluido y la interacción con múltiples integrantes del grupo.', descripcion: 'Se forman dos círculos concéntricos mirando frente a frente. A la orden del animador, el círculo exterior gira como las agujas del reloj para conversar sobre un tema propuesto con cada nueva pareja.' },
+      { id: 'di-28', numero: 28, categoria: 'dinamica', icono: '🎓', nombre: 'La clasecita', objetivo: 'Desarrollar la expresión oral, la improvisación y la escucha activa.', descripcion: 'El guía entrega a un participante una temática al azar sobre la cual debe exponer sus ideas durante 2 minutos. Al terminar, el siguiente compañero resume o clasifica lo expuesto.' },
+      { id: 'di-29', numero: 29, categoria: 'dinamica', icono: '🥤', nombre: 'Pasar un vaso de agua', objetivo: 'Fomentar la precisión motriz, la paciencia y la cooperación en equipo.', descripcion: 'En círculo, cada participante sostiene un vaso desechable con los dientes (sin usar las manos) y debe verter cuidadosamente el agua hacia el vaso del compañero de al lado.' },
+      { id: 'di-30', numero: 30, categoria: 'dinamica', icono: '🤥', nombre: 'Tres verdades y una mentira', objetivo: 'Promover el conocimiento profundo y la interacción lúdica entre pares.', descripcion: 'Cada persona escribe su nombre, tres datos verdaderos sobre sí misma y uno falso. Luego se reúnen en parejas o pequeños grupos para descubrir cuál de las afirmaciones es la mentira.' },
+      { id: 'di-31', numero: 31, categoria: 'dinamica', icono: '🔤', nombre: 'Nombres y adjetivos', objetivo: 'Facilitar la memorización de los nombres de los integrantes mediante asociación.', descripcion: 'Cada participante se presenta diciendo su nombre acompañado de un adjetivo positivo o divertido que comience con la misma letra inicial (ej. "Soy Consuelo y soy creativa").' },
+      { id: 'di-32', numero: 32, categoria: 'dinamica', icono: '🐇', nombre: 'Lince y conejo', objetivo: 'Desarrollar la percepción auditiva, el sigilo y la orientación espacial.', descripcion: 'Dentro de un círculo formado por el grupo, un "lince" con los ojos vendados intenta atrapar a un "conejo" guiándose solo por el oído. Si el lince dice "conejo", este debe responder "lince".' },
+      { id: 'di-33', numero: 33, categoria: 'dinamica', icono: '🦔', nombre: 'El topo', objetivo: 'Agudizar el sentido del tacto y la observación detallada del entorno natural.', descripcion: 'En grupos de cinco, cada uno recoge un objeto natural pequeño y lo examina bien. Luego se juntan todos los objetos al centro y, con los ojos vendados, cada jugador debe identificar el suyo al tacto.' },
+      { id: 'di-34', numero: 34, categoria: 'dinamica', icono: '🐾', nombre: 'Las huellas', objetivo: 'Estimular la observación del entorno natural y el trabajo deductivo en equipo.', descripcion: 'En un espacio al aire libre, los participantes exploran el terreno en busca de huellas de animales o rastros naturales para deducir y compartir a qué especie pertenecen.' },
+      { id: 'di-35', numero: 35, categoria: 'dinamica', icono: '👃', nombre: 'Los cinco sentidos', objetivo: 'Potenciar la percepción sensorial y la atención plena en contacto con la naturaleza.', descripcion: 'Cada participante recolecta elementos naturales seguros para explorarlos y reconocerlos con los ojos vendados utilizando tacto, oído, olfato y finalmente la vista.' },
+      { id: 'di-36', numero: 36, categoria: 'dinamica', icono: '📞', nombre: 'Pedro llama a Pablo', objetivo: 'Reforzar el aprendizaje de nombres y la velocidad de reacción verbal.', descripcion: 'En círculo, un participante dice su nombre y llama a otro: "Pedro llama a Pablo". El aludido debe responder de inmediato llamando a otra persona; si tarda o se equivoca, realiza una prenda.' },
+      { id: 'di-37', numero: 37, categoria: 'dinamica', icono: '🔢', nombre: 'Números', objetivo: 'Fomentar la integración rápida, la inclusión y la agilidad de desplazamiento.', descripcion: 'El grupo camina libremente por el espacio hasta que el animador grita un número. Todos deben agruparse rápidamente formando equipos exactamente de esa cantidad de personas.' },
+      { id: 'di-38', numero: 38, categoria: 'dinamica', icono: '🐦', nombre: '"Prrr" y "Pukutu"', objetivo: 'Ejercitar la discriminación auditiva y el control postural.', descripcion: 'Se imaginan dos aves: al escuchar "prrr", todos se paran de puntillas y aletean con los codos; al escuchar "pukutu", todos deben quedarse completamente inmóviles como estatuas.' },
+      { id: 'di-39', numero: 39, categoria: 'dinamica', icono: '🚕', nombre: 'Paseo en taxi', objetivo: 'Dinamizar al grupo y formar subgrupos de trabajo de manera espontánea.', descripcion: 'Los participantes simulan conducir taxis por el salón. Cuando el animador indica la capacidad del taxi (ej. "Taxis de 4 pasajeros"), deben agruparse rápidamente en esa cantidad.' },
+      { id: 'di-40', numero: 40, categoria: 'dinamica', icono: '💃', nombre: 'Hokey cokey', objetivo: 'Promover la alegría grupal, el esquema corporal y el seguimiento de ritmo.', descripcion: 'En círculo cantan el Hokey Cokey metiendo y sacando el pie derecho, sacudiéndolo, meneando la cintura y dando una vuelta completa. En cada estrofa se cambia la parte del cuerpo.' },
+      { id: 'di-41', numero: 41, categoria: 'dinamica', icono: '🎙️', nombre: 'El objeto hablador', objetivo: 'Estimular la fluidez verbal, la improvisación y la escucha respetuosa.', descripcion: 'Sentados en círculo se pasan un objeto. Quien lo sostiene tiene la palabra y debe hablar continuamente sobre un tema propuesto hasta que el compañero de al lado decida tomar el objeto.' },
+      { id: 'di-42', numero: 42, categoria: 'dinamica', icono: '🔵', nombre: 'Toca algo azul', objetivo: 'Activar la observación rápida del entorno y la movilidad física.', descripcion: 'El animador pide tocar algo de un color o textura específica (ej. "¡Toca algo azul!") y todos deben desplazarse rápidamente a tocar un objeto o prenda que cumpla la consigna.' },
+      { id: 'di-43', numero: 43, categoria: 'dinamica', icono: '💖', nombre: 'Bombardeo', objetivo: 'Fortalecer la autoestima, la empatía y los vínculos afectivos del grupo.', descripcion: 'Formados en dos filas frente a frente, cada participante expresa sinceramente cualidades y pensamientos positivos sobre la persona que tiene enfrente, y luego intercambian turnos.' },
+      { id: 'di-44', numero: 44, categoria: 'dinamica', icono: '🔄', nombre: 'Sagidi sagidi sapopo', objetivo: 'Desarrollar la atención visual retardada y la coordinación grupal en canon.', descripcion: 'En círculo cantan "Sagidi sagidi sapopo". El guía hace un gesto nuevo en cada ronda y cada persona debe imitar el gesto que hizo su compañero de la izquierda en la vuelta anterior.' },
+      { id: 'di-45', numero: 45, categoria: 'dinamica', icono: '🎭', nombre: '¡O kabita!', objetivo: 'Explorar la expresión emocional y la comunicación no verbal.', descripcion: 'Por turnos en el círculo, cada participante pronuncia la frase "¡O, kabita!" transmitiendo una emoción distinta (alegría, sorpresa, temor, enojo, entusiasmo) y el grupo la replica.' },
+      { id: 'di-46', numero: 46, categoria: 'dinamica', icono: '📖', nombre: 'Libro mágico', objetivo: 'Fomentar la creatividad mimética y la participación espontánea.', descripcion: 'Por turnos, un participante pasa al centro ("libro mágico"), simula sacar un objeto invisible y realiza acciones con él hasta que el resto del grupo adivine de qué objeto se trata.' },
+      { id: 'di-47', numero: 47, categoria: 'dinamica', icono: '🐛', nombre: 'El cien pies', objetivo: 'Integrar el cálculo mental rápido con la formación colaborativa de equipos.', descripcion: 'Cantan "El cien pies no tiene pies...". Cuando el guía dice un número de pies (ej. "¡Diez pies!"), los participantes forman grupos cuya suma de pies apoyados coincida con la cifra.' },
+      { id: 'di-48', numero: 48, categoria: 'dinamica', icono: '🤗', nombre: 'Cunde, cundaya', objetivo: 'Generar cohesión física, confianza y cercanía grupal.', descripcion: 'En círculo y tomados de la cintura cantan "Cunde, cunde, cunde... cunda ya". En cada repetición dan un paso hacia el centro y se inclinan juntos hasta quedar unidos en un gran abrazo grupal.' },
+      { id: 'di-49', numero: 49, categoria: 'dinamica', icono: '👏', nombre: 'Da 3 palmas', objetivo: 'Estimular la espontaneidad, el ritmo y la interacción lúdica.', descripcion: 'En círculo cantan "Da tres palmas, otra vez... ahí donde estás parado..." y el guía completa la rima con una acción divertida para hacer con el compañero de al lado.' },
+      { id: 'di-50', numero: 50, categoria: 'dinamica', icono: '👟', nombre: 'La risa del chágualo', objetivo: 'Trabajar el autocontrol emocional y desatar la risa colectiva.', descripcion: 'Dos filas frente a frente: el guía lanza un zapato al centro. Si cae boca arriba, una fila ríe a carcajadas y la otra debe mantenerse completamente seria; si cae boca abajo, se invierten los roles.' },
+
+      // ==================== JUEGOS (1-50) ====================
+      { id: 'ju-1', numero: 1, categoria: 'juego', icono: '⭕', nombre: 'Pasar el aro', objetivo: 'Fomentar la cooperación, la coordinación corporal y el trabajo en equipo sin soltarse.', descripcion: 'Todos los participantes forman una fila o círculo tomados de las manos. Se coloca un aro (ula-ula) en el brazo de uno de los extremos y el equipo debe hacerlo pasar de persona en persona hasta llegar al otro extremo sin soltar las manos en ningún momento.', valor: 'Físico, social y emocional', tipo: 'E-E' },
+      { id: 'ju-2', numero: 2, categoria: 'juego', icono: '🦋', nombre: 'Cazando mariposas (La Pinta)', objetivo: 'Desarrollar la velocidad de desplazamiento, la agilidad y la orientación espacial.', descripcion: 'Uno o dos jugadores actúan como "cazadores" con un aro o pañuelo (red de mariposas) y deben atrapar suavemente a los demás participantes ("mariposas") dentro del área delimitada. Quien es tocado pasa a ayudar o queda congelado hasta que un compañero lo libere pasando por debajo de sus brazos.', valor: 'Físico y social', tipo: 'I-G' },
+      { id: 'ju-3', numero: 3, categoria: 'juego', icono: '🏇', nombre: 'Hipódromo', objetivo: 'Promover el entusiasmo grupal, la velocidad de reacción y el aliento colectivo.', descripcion: 'Se divide al grupo en equipos ("caballos") ubicados en carriles paralelos mientras el resto hace barra animando. A la señal del guía, los corredores avanzan imitando el galope hasta dar la vuelta a un cono y entregar el relevo al siguiente compañero. Gana el equipo que complete primero la carrera con mayor energía.', valor: 'Físico, social y emocional', tipo: 'E-E' },
+      { id: 'ju-4', numero: 4, categoria: 'juego', icono: '💣', nombre: 'Campo minado con aros', objetivo: 'Desarrollar la memoria espacial, la comunicación asertiva y la estrategia en equipo.', descripcion: 'Se dispone una cuadrícula de aros en el suelo; el guía tiene un mapa secreto con la ruta segura y los aros que contienen "minas". Por turnos, cada equipo envía a un integrante a cruzar paso a paso: si pisa una mina (sonido del guía), debe regresar y el siguiente compañero recuerda el camino correcto hasta lograr cruzar todo el equipo.', valor: 'Intelectual, físico y social', tipo: 'E-E' },
+      { id: 'ju-5', numero: 5, categoria: 'juego', icono: '📰', nombre: 'Carrera con el diario', objetivo: 'Estimular el equilibrio dinámico, la coordinación motriz y la rapidez.', descripcion: 'En equipos de relevos, cada participante debe correr desde la salida hasta la meta manteniendo una hoja de papel de diario abierta sobre el pecho (sin sostenerla con las manos, solo con el impulso del aire al correr) o trasladándola en distintas partes del cuerpo indicadas por el guía.', valor: 'Físico y emocional', tipo: 'E-E' },
+      { id: 'ju-6', numero: 6, categoria: 'juego', icono: '🧞', nombre: 'Alfombra Mágica', objetivo: 'Reforzar el esquema corporal, la velocidad de reacción y la atención auditiva.', descripcion: 'Cada participante o pareja se ubica sobre una hoja de diario ("alfombra mágica") mientras suena música. Cuando la música se detiene, el animador nombra una o dos partes del cuerpo (ej. "¡Codo y rodilla!") y los jugadores deben apoyar únicamente esas partes sobre su diario sin tocar el suelo.', valor: 'Físico e intelectual', tipo: 'I-I' },
+      { id: 'ju-7', numero: 7, categoria: 'juego', icono: '🏃', nombre: 'Relevos con variantes', objetivo: 'Potenciar la resistencia aeróbica, la coordinación y la cohesión de equipo.', descripcion: 'Se organizan equipos en hileras detrás de la línea de partida. En cada ronda el guía indica una forma distinta de desplazarse hasta el cono y volver (corriendo de espaldas, saltando a pies juntos, en cuadrupedia, haciendo zig-zag o transportando un objeto). Gana el equipo que complete todas las postas primero.', valor: 'Físico, social y emocional', tipo: 'E-E' },
+      { id: 'ju-8', numero: 8, categoria: 'juego', icono: '⛵', nombre: 'Barco (Popa, Proa, Estribor y Babor)', objetivo: 'Desarrollar la orientación espacial, la atención y la rapidez de reacción física.', descripcion: 'Se delimita una zona central como cubierta de un barco. El capitán grita órdenes: "¡Proa!" (correr adelante), "¡Popa!" (atrás), "¡Estribor!" (derecha), "¡Babor!" (izquierda) y "¡Torpedo!" (todos al suelo boca abajo). Los últimos en ejecutar la orden realizan un reto divertido o suman puntos en contra.', valor: 'Físico-Cognitivo', tipo: 'I-I' },
+      { id: 'ju-9', numero: 9, categoria: 'juego', icono: '❓', nombre: '¿Quién soy?', objetivo: 'Estimular el razonamiento deductivo, la formulación de preguntas y la interacción social.', descripcion: 'A cada participante se le pega en la espalda o frente una tarjeta con el nombre de un personaje, animal u objeto sin que pueda verlo. Caminando por el espacio, deben hacer preguntas cerradas (que solo se respondan con "Sí" o "No") a sus compañeros hasta descubrir su identidad.', valor: 'Intelectual y social', tipo: 'I-I' },
+      { id: 'ju-10', numero: 10, categoria: 'juego', icono: '🐢', nombre: 'Pinta (Variantes Hombres Tortuga)', objetivo: 'Fomentar la agilidad, la solidaridad entre compañeros y la resistencia física.', descripcion: 'Juego de persecución con variantes colaborativas: cuando el "mancha" toca a un jugador, este se convierte en "tortuga" (boca arriba moviendo brazos y piernas) o queda congelado con las piernas abiertas. Para ser salvado, un compañero libre debe darle la vuelta o pasar por debajo.', valor: 'Físico y social', tipo: 'I-G' },
+      { id: 'ju-11', numero: 11, categoria: 'juego', icono: '🏘️', nombre: 'El Inquilino', objetivo: 'Desarrollar la velocidad de reacción, la atención y la integración grupal.', descripcion: 'Se forman tríos: dos personas tomadas de las manos forman una "casa" (pared izquierda y derecha) y una tercera se ubica dentro como "inquilino". Cuando el guía grita "¡Inquilino!", estos cambian de casa; si grita "¡Pared!", las casas buscan nuevo inquilino; si grita "¡Terremoto!", todos se mezclan y arman nuevos tríos.', valor: 'Físico, social y emocional', tipo: 'I-G' },
+      { id: 'ju-12', numero: 12, categoria: 'juego', icono: '✊', nombre: 'Cachipún carga', objetivo: 'Combinar el azar lúdico con el esfuerzo físico compartido y el compañerismo.', descripcion: 'Los participantes forman parejas y juegan piedra, papel o tijera ("cachipún"). En cada ronda, quien pierde debe cargar suavemente al ganador (en caballito o de la mano según seguridad) para avanzar un tramo hacia la meta establecida.', valor: 'Físico, social y emocional', tipo: 'I-I' },
+      { id: 'ju-13', numero: 13, categoria: 'juego', icono: '🤝', nombre: 'Carrera Rompehielo', objetivo: 'Promover la presentación rápida, la empatía y la activación física inicial.', descripcion: 'Todos trotan libremente por la cancha en distintas direcciones. A la señal del guía (silbato o palmada), cada persona debe detenerse frente al compañero más cercano, estrechar su mano, decir su nombre, su carrera o comida favorita y continuar corriendo.', valor: 'Social, físico y emocional', tipo: 'I-I' },
+      { id: 'ju-14', numero: 14, categoria: 'juego', icono: '⚡', nombre: 'Toco, no me tocan', objetivo: 'Mejorar los reflejos defensivos, el desplazamiento lateral y la percepción espacial.', descripcion: 'Todos se desplazan dentro de un área delimitada. El objetivo individual es intentar tocar suavemente la rodilla o el hombro de cualquier compañero mientras se esquiva para evitar ser tocado. Quien recibe tres toques realiza 5 saltos de tijera para volver a entrar.', valor: 'Físico-Cognitivo', tipo: 'I-I' },
+      { id: 'ju-15', numero: 15, categoria: 'juego', icono: '💪', nombre: 'Derecha Izquierda', objetivo: 'Trabajar la velocidad de reacción y la interacción rápida.', descripcion: 'El animador dice una parte del cuerpo y los participantes deben tocar la mayor cantidad de veces esa parte del cuerpo de otros compañeros (ej. "¡Codo!"). Quien logre tocar más en el tiempo indicado gana la ronda.', valor: 'Físico-Social', tipo: 'I-I' },
+      { id: 'ju-16', numero: 16, categoria: 'juego', icono: '🦁', nombre: 'Cachipún Animales', objetivo: 'Fomentar la toma de decisiones colectivas y la sincronización grupal.', descripcion: 'Se forman dos equipos que se reúnen en secreto para acordar qué animal representarán (León vence a Cazador, Cazador vence a Escopeta, Escopeta vence a León). Al enfrentarse frente a frente, todos los integrantes del equipo deben hacer exactamente la misma postura y sonido al unísono.', valor: 'Intelectual, social y emocional', tipo: 'E-E' },
+      { id: 'ju-17', numero: 17, categoria: 'juego', icono: '🕶️', nombre: 'Hombres de negro', objetivo: 'Desarrollar la agilidad, el trabajo en equipo y la estrategia de evasión.', descripcion: 'Dos o tres "agentes de negro" custodian la zona central mientras el resto del grupo ("alienígenas") debe cruzar de un extremo a otro de la cancha sin ser interceptado. Quien es tocado se pone sus gafas imaginarias y se une a los Hombres de Negro.', valor: 'Físico y social', tipo: 'I-G' },
+      { id: 'ju-18', numero: 18, categoria: 'juego', icono: '🚩', nombre: 'Atrapa la bandera', objetivo: 'Potenciar la planificación estratégica, la velocidad y la cooperación en equipo.', descripcion: 'Se divide la cancha en dos territorios, cada uno con una bandera o peto en el fondo y una zona de cárcel. Cada equipo debe infiltrarse en el campo rival para capturar su bandera y traerla a su base sin ser tocado por los defensores.', valor: 'Físico, intelectual y social', tipo: 'E-E' },
+      { id: 'ju-19', numero: 19, categoria: 'juego', icono: '🥄', nombre: 'Transportar la pelota', objetivo: 'Trabajar la coordinación motriz, el equilibrio y la precisión.', descripcion: 'Se divide en dos equipos en hilera. Por turnos, el primero llevará una pelota de ping-pong en una cuchara hasta el otro lado, volverá y la pasará a la cuchara del siguiente compañero. Gana el equipo que complete primero el circuito.', valor: 'Físico-Cognitivo', tipo: 'E-E' },
+      { id: 'ju-20', numero: 20, categoria: 'juego', icono: '🛟', nombre: 'Barco hundido', objetivo: 'Promover la cooperación extrema, el equilibrio colectivo y la resolución de problemas.', descripcion: 'Cada equipo recibe un número limitado de colchonetas o cartones ("balsas salvavidas") para cruzar un "mar" sin tocar el suelo. Deben coordinarse para avanzar todos juntos pasando la colchoneta de atrás hacia adelante.', valor: 'Social, físico e intelectual', tipo: 'E-E' },
+      { id: 'ju-21', numero: 21, categoria: 'juego', icono: '🗣️', nombre: 'Simón dice versión Matisop', objetivo: 'Estimular la atención selectiva, la velocidad de respuesta y el humor.', descripcion: 'Variante dinámica del clásico Simón Dice donde el animador ("Matisop") encadena acciones rápidas, cambios de postura y retos grupales (ej. "Matisop dice que formen una pirámide de zapatos"), eliminando o dando puntos a quienes reaccionen antes si no dijo la frase clave.', valor: 'Intelectual, físico y emocional', tipo: 'I-G' },
+      { id: 'ju-22', numero: 22, categoria: 'juego', icono: '🚨', nombre: 'El cono (lenteja) musical', objetivo: 'Trabajar la velocidad de reacción y la atención auditiva.', descripcion: 'Se ponen conos en un círculo (uno menos que la cantidad de jugadores) y se reproduce música. Cuando la música se detiene, rápidamente deben agarrar un cono; quien queda sin cono sale de la ronda y se retira un cono hasta tener un ganador.', valor: 'Físico-Cognitivo', tipo: 'I-I' },
+      { id: 'ju-23', numero: 23, categoria: 'juego', icono: '🥏', nombre: 'Frisbee (Juego Soto)', objetivo: 'Desarrollar habilidades fisicomotrices y memoria espacial.', descripcion: 'Dos equipos juegan estilo Ultimate Frisbee sin dar pasos con el disco en la mano. Cada vez que el guía grita "¡Camaleón!", se pausa para activar una regla especial rotativa: "Mano Izquierda", "Frisbee 360" (girar antes de lanzar), "Saltando" o "En caballito". Gana el equipo con más anotaciones.', valor: 'Físico-Social', tipo: 'E-E' },
+      { id: 'ju-24', numero: 24, categoria: 'juego', icono: '🏐', nombre: 'Quemadas', objetivo: 'Desarrollar la coordinación óculo-manual, los reflejos y el juego limpio.', descripcion: 'Dos equipos se ubican en mitades opuestas de la cancha con una o más pelotas blandas. Los jugadores lanzan para tocar ("quemar") a los rivales debajo de los hombros; si un jugador atrapa el balón en el aire sin que caiga, salva a un compañero eliminado.', valor: 'Físico, social y emocional', tipo: 'E-E' },
+      { id: 'ju-25', numero: 25, categoria: 'juego', icono: '🌍', nombre: 'Naciones', objetivo: 'Fomentar la agilidad de reacción, la puntería y la atención a consignas.', descripcion: 'Cada jugador elige el nombre de un país. Uno lanza una pelota blanda verticalmente al aire mientras grita el nombre de un país; el aludido debe correr a atraparla y gritar "¡Stop!" mientras los demás huyen, pudiendo luego dar tres pasos para lanzar hacia un compañero.', valor: 'Físico-Cognitivo', tipo: 'I-G' },
+      { id: 'ju-26', numero: 26, categoria: 'juego', icono: '🦵', nombre: 'Carrera de tres piernas', objetivo: 'Fomentar la coordinación, la comunicación y el trabajo colaborativo entre los participantes.', descripcion: 'Se forman parejas y se ubican una al lado de la otra. Se amarra suavemente el tobillo derecho de una persona con el tobillo izquierdo de su compañero. A la señal de inicio, cada pareja avanza coordinadamente hasta la meta. Gana la pareja que llegue primero sin soltarse.', valor: 'Físico, social y emocional', tipo: 'E-E' },
+      { id: 'ju-27', numero: 27, categoria: 'juego', icono: '🗺️', nombre: 'Búsqueda del tesoro', objetivo: 'Desarrollar la capacidad de observación, la resolución de problemas y la colaboración grupal.', descripcion: 'Se organizan equipos y se entrega una primera pista o mapa con acertijos ocultos en distintos puntos del espacio. Cada equipo debe descifrar las claves en orden y superar pequeños desafíos colaborativos hasta encontrar el tesoro final.', valor: 'Físico, social y emocional', tipo: 'E-E' },
+      { id: 'ju-28', numero: 28, categoria: 'juego', icono: '📝', nombre: 'Carrera de palabras', objetivo: 'Desarrollar la agilidad mental, la memoria y la coordinación grupal.', descripcion: 'Se forman equipos en una línea de partida con tarjetas de imágenes o palabras. A la señal, el primer participante corre hasta el punto de respuesta, escribe o dice la palabra correspondiente y vuelve a dar el relevo. Gana el equipo con más aciertos.', valor: 'Físico, intelectual y social', tipo: 'E-E' },
+      { id: 'ju-29', numero: 29, categoria: 'juego', icono: '💧', nombre: 'Aguatero', objetivo: 'Fortalecer la coordinación, la precisión y la cooperación mediante el traslado de agua.', descripcion: 'Cada equipo tiene un balde con agua en la salida y una botella vacía en la meta. Por turnos, cada participante traslada agua usando un vaso pequeño o esponja y la deposita en la botella. Gana el equipo que reúna más agua al terminar el tiempo.', valor: 'Físico, intelectual, social y emocional', tipo: 'E-E' },
+      { id: 'ju-30', numero: 30, categoria: 'juego', icono: '🎤', nombre: 'Si se la sabe, cante', objetivo: 'Trabajar la reacción, la memoria musical y la participación grupal.', descripcion: 'Se forman equipos y una persona reproduce canciones conocidas. Cuando la música se detiene de golpe, el equipo indicado debe continuar cantando la letra exacta para ganar puntos.', valor: 'Intelectual, social y emocional', tipo: 'E-E' },
+      { id: 'ju-31', numero: 31, categoria: 'juego', icono: '🤸', nombre: 'Carretilla Humana', objetivo: 'Desarrollar la coordinación motriz, la fuerza y la colaboración entre compañeros.', descripcion: 'En parejas, una persona apoya las manos en el suelo y la otra la sostiene firmemente por las piernas formando una carretilla. Avanzan hasta una marca, intercambian roles y regresan al punto de partida.', valor: 'Físico, social y emocional', tipo: 'I-I' },
+      { id: 'ju-32', numero: 32, categoria: 'juego', icono: '⭐', nombre: 'La estrella', objetivo: 'Favorecer la coordinación grupal, la orientación espacial y la atención a instrucciones.', descripcion: 'Los participantes se organizan dejando un espacio central y siguen las indicaciones del guía para desplazarse y cambiar de posición coordinadamente, formando y desarmando una figura de estrella con variantes de salto u obstáculos.', valor: 'Físico, intelectual y social', tipo: 'G-G' },
+      { id: 'ju-33', numero: 33, categoria: 'juego', icono: '❌', nombre: 'Gato Gigante', objetivo: 'Promover la estrategia, la velocidad y el trabajo en equipo mediante un tablero de gato.', descripcion: 'Dos equipos identificados por color compiten en relevos frente a un tablero de 9 aros en el suelo. Por turnos corren a colocar un peto en una casilla y vuelven a habilitar al siguiente hasta formar una línea de tres.', valor: 'Físico, intelectual y social', tipo: 'E-E' },
+      { id: 'ju-34', numero: 34, categoria: 'juego', icono: '🗿', nombre: 'El escultor', objetivo: 'Desarrollar la percepción espacial, la atención y la capacidad de responder a señales.', descripcion: 'Dos equipos se ubican en los extremos de la cancha y un "escultor" al centro. Cada vez que el guía da una palmada, los equipos cruzan de lado mientras el escultor intenta tocarlos para convertir al tocado en el nuevo escultor.', valor: 'Físico, intelectual y social', tipo: 'I-G' },
+      { id: 'ju-35', numero: 35, categoria: 'juego', icono: '🎬', nombre: 'Carrera de charadas', objetivo: 'Estimular la creatividad, la comunicación no verbal y la capacidad de adivinar conceptos.', descripcion: 'Dos equipos compiten por turnos: un integrante toma una tarjeta y representa el concepto solo con mímica (sin hablar ni hacer sonidos) mientras su equipo intenta adivinarlo dentro del tiempo límite.', valor: 'Físico, intelectual, social y emocional', tipo: 'E-E' },
+      { id: 'ju-36', numero: 36, categoria: 'juego', icono: '🎯', nombre: 'El juego de los aros', objetivo: 'Desarrollar la precisión de lanzamiento y la coordinación motriz por equipos.', descripcion: 'Se delimita una línea de lanzamiento frente a un cono u objetivo. Por turnos, cada integrante de los equipos lanza aros intentando encestarlos para sumar puntos a lo largo de varias rondas.', valor: 'Físico, intelectual y social', tipo: 'E-E' },
+      { id: 'ju-37', numero: 37, categoria: 'juego', icono: '🪣', nombre: 'Carrera de agua', objetivo: 'Fomentar el trabajo en equipo y la coordinación mediante un circuito de relevo.', descripcion: 'Tres equipos en fila trasladan agua por relevos desde un recipiente inicial hasta una botella en la meta utilizando un vaso, variando la forma de transporte (sobre la cabeza, saltando, etc.).', valor: 'Físico, intelectual, social y emocional', tipo: 'E-E' },
+      { id: 'ju-38', numero: 38, categoria: 'juego', icono: '⚽', nombre: 'Fútbol sin pelota', objetivo: 'Fomentar el trabajo en equipo, la agilidad y la elaboración de estrategias.', descripcion: 'Dos equipos buscan cruzar hasta la zona de gol contraria para anotar puntos sin usar balón. Si un atacante es tocado por un defensor en campo rival, debe volver a su línea de partida.', valor: 'Físico, intelectual, social y emocional', tipo: 'E-E' },
+      { id: 'ju-39', numero: 39, categoria: 'juego', icono: '🚓', nombre: 'Policías y ladrones', objetivo: 'Desarrollar la velocidad, la estrategia y la cooperación en una dinámica de persecución.', descripcion: 'Se divide el grupo en policías y ladrones con una zona delimitada de prisión. Los policías capturan ladrones y los llevan a prisión, mientras los ladrones libres pueden rescatarlos tocándolos.', valor: 'Físico, intelectual, social y emocional', tipo: 'G-G' },
+      { id: 'ju-40', numero: 40, categoria: 'juego', icono: '🪢', nombre: 'Tirar la cuerda', objetivo: 'Fomentar la fuerza colectiva, la resistencia y la coordinación rítmica de equipo.', descripcion: 'Dos equipos equilibrados se ubican a cada lado de una cuerda con un pañuelo atado al centro. A la señal, tiran en sentidos opuestos hasta lograr cruzar el pañuelo más allá de la marca de su lado.', valor: 'Físico, social y emocional', tipo: 'E-E' },
+      { id: 'ju-41', numero: 41, categoria: 'juego', icono: '🎵', nombre: 'Aros Musicales', objetivo: 'Desarrollar habilidades motrices al caminar, bailar y reaccionar ante una señal musical.', descripcion: 'Se distribuyen aros en el suelo y los participantes bailan alrededor mientras suena la música. Al detenerse, deben ubicarse dentro de un aro; se retira un aro en cada ronda hasta quedar un ganador.', valor: 'Físico, intelectual, social y emocional', tipo: 'I-I' },
+      { id: 'ju-42', numero: 42, categoria: 'juego', icono: '🚘', nombre: 'Patentes', objetivo: 'Estimular la memoria, la atención y la agilidad motriz.', descripcion: 'Se preparan tarjetas con códigos o patentes que los jugadores memorizan. Al desplazarse y recibir la señal del guía, deben identificar o agruparse según las combinaciones asignadas.', valor: 'Físico, intelectual y emocional', tipo: 'I-I' },
+      { id: 'ju-43', numero: 43, categoria: 'juego', icono: '⚔️', nombre: 'Cachipún actuado', objetivo: 'Desarrollar la toma de decisiones, la planificación y el trabajo en equipo.', descripcion: 'Dos equipos acuerdan en secreto una figura corporal (león, escopeta o cazador). A la señal, ambos realizan simultáneamente su representación al mejor de tres o más rondas.', valor: 'Físico, intelectual, social y emocional', tipo: 'E-E' },
+      { id: 'ju-44', numero: 44, categoria: 'juego', icono: '🧘', nombre: 'Twister', objetivo: 'Desarrollar habilidades motrices al agacharse, estirarse y mantener el equilibrio.', descripcion: 'Los participantes rodean un espacio donde se lanza un objeto liviano. El jugador nombrado debe estirarse al máximo para recogerlo sin perder el equilibrio ni caer al suelo.', valor: 'Físico, intelectual y emocional', tipo: 'I-I' },
+      { id: 'ju-45', numero: 45, categoria: 'juego', icono: '🦢', nombre: 'Pato, pato, ganso', objetivo: 'Desarrollar la agilidad, la velocidad de reacción y la capacidad de escapar y perseguir.', descripcion: 'Sentados en círculo, una persona camina por fuera tocando la cabeza de cada compañero diciendo "pato" hasta elegir a alguien diciendo "¡ganso!", quien debe perseguirlo alrededor del círculo antes de que ocupe su lugar.', valor: 'Físico, social y emocional', tipo: 'I-I' },
+      { id: 'ju-46', numero: 46, categoria: 'juego', icono: '✍️', nombre: 'Bachillerato por equipos', objetivo: 'Desarrollar habilidades intelectuales para procesar información y elaborar palabras según indicaciones.', descripcion: 'Equipos de cinco o más personas con papel y lápiz reciben una temática y una letra. Dentro del tiempo límite deben escribir palabras válidas para sumar puntos según cantidad y extensión.', valor: 'Intelectual, social y emocional', tipo: 'E-E' },
+      { id: 'ju-47', numero: 47, categoria: 'juego', icono: '➰', nombre: 'Saltar la cuerda', objetivo: 'Trabajar en equipo, mejorar la coordinación y desarrollar la resistencia.', descripcion: 'En tres equipos con una cuerda larga cada uno, dos integrantes giran la cuerda mientras los demás entran por turnos a realizar la secuencia de saltos indicada sin detener el ritmo.', valor: 'Físico, social y emocional', tipo: 'E-E' },
+      { id: 'ju-48', numero: 48, categoria: 'juego', icono: '🕸️', nombre: 'Tejiendo redes', objetivo: 'Trabajar en equipo la coordinación, la concentración y la memoria secuencial.', descripcion: 'En círculo, pasan un balón recordando quién se lo lanzó hasta que todos lo hayan recibido una vez. Luego realizan el recorrido exactamente en orden inverso, pudiendo sumar más balones.', valor: 'Físico, intelectual y social', tipo: 'G-G' },
+      { id: 'ju-49', numero: 49, categoria: 'juego', icono: '👳', nombre: 'Alibaba y los 40 ladrones', objetivo: 'Desarrollar la coordinación, la atención y la creatividad mediante la imitación.', descripcion: 'En círculo, un líder inicia una secuencia de movimientos al ritmo de la frase "Alibaba y los 40 ladrones" y el grupo los va reproduciendo en canon cada vez más rápido.', valor: 'Físico, intelectual, social y emocional', tipo: 'I-G' },
+      { id: 'ju-50', numero: 50, categoria: 'juego', icono: '🃏', nombre: 'Juego de la memoria', objetivo: 'Fortalecer la memoria, la concentración, la comunicación y el trabajo en equipo.', descripcion: 'Dos equipos compiten en relevos frente a un tablero con tarjetas pares boca abajo. Por turnos corren a voltear dos tarjetas; si coinciden conservan el par y si no las vuelven a tapar.', valor: 'Físico, intelectual, social y emocional', tipo: 'E-E' }
+    ];
+
+    // =========================================================================
+    // REFLEXIONES INICIALES DEL DOCUMENTO + INTEGRANTES DEL EQUIPO
+    // =========================================================================
+    const DEFAULT_REFLECTIONS = [
+      {
+        id: 'ref-agustin',
+        nombre: 'Agustín Soto',
+        rol: 'Integrante del Grupo',
+        texto: 'Liderazgo juegos y recreación no es un ramo únicamente para pasarlo bien, aquí me di cuenta que el sentido de los juegos no es solo que los demás se entretengan y se diviertan, sino que también son una herramienta metodológica poderosa que nos van a ayudar a nuestro desempeño laboral. Al hacer la dirección de juego me di cuenta que no es tampoco una tarea simple, sino que requiere de liderazgo para poder motivar y mover al grupo, lo cual en la vida profesional es crucial.'
+      },
+      {
+        id: 'ref-elena',
+        nombre: 'Elena Castro',
+        rol: 'Integrante del Grupo',
+        texto: 'A través de las distintas actividades, aprendí que jugar también implica relacionarse con otras personas, aprender a respetar diferentes formas de participar, colaborar y enfrentar desafíos en conjunto. Además, entendí que el liderazgo no consiste simplemente en dar instrucciones o estar a cargo de un grupo, sino también en saber escuchar, generar confianza y adaptar las actividades para que todos puedan involucrarse. Me quedo con la importancia de estas herramientas, ya que la recreación puede convertirse en una oportunidad para fortalecer vínculos, promover la inclusión y generar espacios de aprendizaje y bienestar.'
+      },
+      {
+        id: 'ref-maria-dominga',
+        nombre: 'María Dominga López',
+        rol: 'Integrante del Grupo',
+        texto: 'Participar en este ramo y construir esta bitácora me permitió comprender que el juego es un puente real de comunicación y empatía. Muchas veces en contextos académicos o laborales nos enfocamos únicamente en los resultados, olvidando que la cohesión humana se construye desde la confianza y la distensión. Liderar una dinámica o un aplauso exige observación activa, energía positiva y sensibilidad para leer lo que el grupo necesita en cada momento, habilidades que sin duda marcarán mi forma de trabajar en equipo.'
+      },
+      {
+        id: 'ref-camila',
+        nombre: 'Camila Villalobos',
+        rol: 'Integrante del Grupo',
+        texto: 'Al principio veía los aplausos y las dinámicas simplemente como actividades para romper el hielo, pero con el avance de las clases descubrí la planificación pedagógica y emocional que hay detrás de cada consigna. Aprendí que un buen líder recreativo no es quien más habla, sino quien logra que todas las personas se sientan cómodas, seguras y parte importante del grupo, transformando un espacio cotidiano en una experiencia significativa de integración y aprendizaje colectivo.'
+      },
+      {
+        id: 'ref-clemente',
+        nombre: 'Clemente Gamerre',
+        rol: 'Integrante del Grupo',
+        texto: 'La experiencia de dirigir juegos frente al curso me sacó de mi zona de confort y me enseñó el valor de la claridad comunicativa y la adaptabilidad. En la práctica, las reglas deben explicarse con entusiasmo y precisión, y siempre hay que estar preparado para ajustar variantes sobre la marcha si el grupo requiere mayor dinamismo o inclusión. Me llevo herramientas concretas para motivar equipos, resolver conflictos de manera lúdica y fomentar un ambiente colaborativo en cualquier ámbito profesional.'
+      },
+      {
+        id: 'ref-sebastian',
+        nombre: 'Sebastián Wilson',
+        rol: 'Integrante del Grupo',
+        texto: 'Recopilar y poner en práctica estas 150 actividades me demostró que la recreación bien orientada tiene un impacto directo en la motivación, la creatividad y el sentido de pertenencia de las personas. Entendí que liderar desde lo lúdico implica dar el ejemplo, perder el miedo al ridículo y contagiar energía para que los demás también se atrevan a participar. Este aprendizaje trasciende la sala de clases y se convierte en un recurso clave para gestionar grupos humanos con cercanía y propósito.'
+      }
+    ];
+
+    // =========================================================================
+    // ESTADO GLOBAL & PERSISTENCIA (localStorage)
+    // =========================================================================
+    let completedIds = new Set(JSON.parse(localStorage.getItem('bitacora2026_completed') || '[]'));
+    let favoriteIds = new Set(JSON.parse(localStorage.getItem('bitacora2026_favorites') || '[]'));
+    let reflectionsList = (() => {
+      const saved = JSON.parse(localStorage.getItem('bitacora2026_reflections') || 'null');
+      if (!saved) return DEFAULT_REFLECTIONS;
+      // Asegurar que las 6 reflexiones base estén presentes si existía una versión previa guardada
+      const existingIds = new Set(saved.map(r => r.id));
+      const missingDefaults = DEFAULT_REFLECTIONS.filter(r => !existingIds.has(r.id));
+      return [...saved, ...missingDefaults];
+    })();
+    let sessionHistory = [];
+    let soundEnabled = true;
+
+    // Filtros Catálogo
+    let currentCatFilter = 'all';
+    let currentGameTypeFilter = 'all';
+    let currentGameValueFilter = 'all';
+    let onlyFavoritesFilter = false;
+
+    // Estado Ruleta
+    let wheelItems = [];
+    let currentRotation = 0; // radianes
+    let isSpinning = false;
+    let lastSliceIndex = -1;
+    let currentModalItem = null;
+
+    // =========================================================================
+    // WEB AUDIO API (SONIDOS SINTETIZADOS SIN URLS EXTERNAS)
+    // =========================================================================
+    let audioCtx = null;
+
+    function getAudioCtx() {
+      if (!audioCtx) {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (AudioContext) audioCtx = new AudioContext();
+      }
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      return audioCtx;
+    }
+
+    function playTickSound() {
+      if (!soundEnabled) return;
+      try {
+        const ctx = getAudioCtx();
+        if (!ctx) return;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(520 + Math.random() * 120, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(140, ctx.currentTime + 0.045);
+
+        gain.gain.setValueAtTime(0.14, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.045);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.05);
+      } catch (e) {}
+    }
+
+    function playWinFanfare() {
+      if (!soundEnabled) return;
+      try {
+        const ctx = getAudioCtx();
+        if (!ctx) return;
+        const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+        notes.forEach((freq, idx) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          const startTime = ctx.currentTime + idx * 0.09;
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, startTime);
+
+          gain.gain.setValueAtTime(0.001, startTime);
+          gain.gain.linearRampToValueAtTime(0.18, startTime + 0.02);
+          gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.35);
+
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(startTime);
+          osc.stop(startTime + 0.36);
+        });
+      } catch (e) {}
+    }
+
+    function toggleSound() {
+      soundEnabled = !soundEnabled;
+      document.getElementById('soundIcon').textContent = soundEnabled ? '🔊' : '🔇';
+      document.getElementById('soundLabel').textContent = soundEnabled ? 'Sonido ON' : 'Silenciado';
+      document.getElementById('soundToggleMobile').textContent = soundEnabled ? '🔊' : '🔇';
+      if (soundEnabled) playTickSound();
+    }
+
+    // =========================================================================
+    // CONFETI EN CANVAS
+    // =========================================================================
+    let confettiParticles = [];
+    let confettiAnimId = null;
+
+    function launchConfetti() {
+      const canvas = document.getElementById('confettiCanvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      const colors = ['#6366f1', '#8b5cf6', '#10b981', '#f59e0b', '#ec4899', '#3b82f6'];
+      confettiParticles = [];
+      for (let i = 0; i < 110; i++) {
+        confettiParticles.push({
+          x: canvas.width / 2 + (Math.random() - 0.5) * 160,
+          y: canvas.height / 2 - 40,
+          vx: (Math.random() - 0.5) * 14,
+          vy: (Math.random() - 0.8) * 14 - 3,
+          size: Math.random() * 8 + 4,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          rotation: Math.random() * 360,
+          vRot: (Math.random() - 0.5) * 12,
+          alpha: 1
+        });
+      }
+
+      if (confettiAnimId) cancelAnimationFrame(confettiAnimId);
+
+      function updateConfetti() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        let active = false;
+        for (const p of confettiParticles) {
+          p.x += p.vx;
+          p.y += p.vy;
+          p.vy += 0.35; // gravedad
+          p.vx *= 0.99;
+          p.rotation += p.vRot;
+          if (p.y > canvas.height * 0.75) p.alpha -= 0.025;
+
+          if (p.alpha > 0) {
+            active = true;
+            ctx.save();
+            ctx.globalAlpha = Math.max(0, p.alpha);
+            ctx.translate(p.x, p.y);
+            ctx.rotate((p.rotation * Math.PI) / 180);
+            ctx.fillStyle = p.color;
+            ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.6);
+            ctx.restore();
+          }
+        }
+        if (active) {
+          confettiAnimId = requestAnimationFrame(updateConfetti);
+        } else {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+      }
+      updateConfetti();
+    }
+
+    // =========================================================================
+    // NAVEGACIÓN Y ESTADÍSTICAS
+    // =========================================================================
+    function switchTab(tabName) {
+      ['ruleta', 'catalogo', 'reflexiones'].forEach(t => {
+        const view = document.getElementById(`view-${t}`);
+        const btn = document.getElementById(`tab-${t}`);
+        if (t === tabName) {
+          view.classList.remove('hidden');
+          btn.className = 'tab-btn flex-1 sm:flex-none px-4 py-2.5 rounded-xl font-bold text-sm transition flex items-center justify-center gap-2 bg-indigo-600 text-white shadow-sm';
+        } else {
+          view.classList.add('hidden');
+          btn.className = 'tab-btn flex-1 sm:flex-none px-4 py-2.5 rounded-xl font-bold text-sm transition flex items-center justify-center gap-2 bg-slate-100 text-slate-600 hover:bg-slate-200';
+        }
+      });
+
+      if (tabName === 'ruleta') {
+        resizeWheelCanvas();
+      } else if (tabName === 'catalogo') {
+        renderCatalog();
+      } else if (tabName === 'reflexiones') {
+        renderReflections();
+      }
+    }
+
+    function updateStats() {
+      document.getElementById('statCompleted').textContent = completedIds.size;
+      document.getElementById('statFavorites').textContent = favoriteIds.size;
+      localStorage.setItem('bitacora2026_completed', JSON.stringify([...completedIds]));
+      localStorage.setItem('bitacora2026_favorites', JSON.stringify([...favoriteIds]));
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.classList.remove('hidden');
+      clearTimeout(toast._timer);
+      toast._timer = setTimeout(() => {
+        toast.classList.add('hidden');
+      }, 2400);
+    }
+
+    // =========================================================================
+    // LÓGICA DE LA RULETA (HTML5 CANVAS HiDPI)
+    // =========================================================================
+    function getFilteredPool() {
+      const mode = document.getElementById('wheelModeSelect').value;
+      const excludeDone = document.getElementById('excludeCompletedChk').checked;
+
+      let pool = BITACORA_DATA.filter(item => {
+        if (excludeDone && completedIds.has(item.id)) return false;
+        if (mode === 'aplauso') return item.categoria === 'aplauso';
+        if (mode === 'dinamica') return item.categoria === 'dinamica';
+        if (mode === 'juego') return item.categoria === 'juego';
+        if (mode === 'favorites') return favoriteIds.has(item.id);
+        return true;
+      });
+
+      if (pool.length === 0) {
+        if (mode === 'favorites') {
+          showToast('Tu lista personalizada está vacía. Mostrando actividades al azar.');
+        } else {
+          showToast('¡Ya realizaste todas! Reiniciando selección disponible.');
+        }
+        pool = [...BITACORA_DATA];
+      }
+      return pool;
+    }
+
+    function changeWheelMode() {
+      const mode = document.getElementById('wheelModeSelect').value;
+      const badge = document.getElementById('wheelBadge');
+      const shuffleBtn = document.getElementById('shuffleQuickBtn');
+      const pool = getFilteredPool();
+
+      if (mode === 'quick') {
+        shuffleBtn.classList.remove('hidden');
+        const shuffled = [...pool].sort(() => Math.random() - 0.5);
+        wheelItems = shuffled.slice(0, Math.min(10, shuffled.length));
+        badge.textContent = `🎲 Ruleta Rápida (${wheelItems.length} al azar)`;
+      } else {
+        shuffleBtn.classList.add('hidden');
+        wheelItems = pool;
+        const labels = {
+          all: `🌈 Todo Mezclado (${wheelItems.length})`,
+          aplauso: `👏 Solo Aplausos (${wheelItems.length})`,
+          dinamica: `⚡ Solo Dinámicas (${wheelItems.length})`,
+          juego: `🏆 Solo Juegos (${wheelItems.length})`,
+          favorites: `⭐ Mi Lista (${wheelItems.length})`
+        };
+        badge.textContent = labels[mode] || `🎡 Ruleta (${wheelItems.length})`;
+      }
+
+      drawWheel();
+    }
+
+    function reshuffleQuickWheel() {
+      if (isSpinning) return;
+      playTickSound();
+      changeWheelMode();
+    }
+
+    function resizeWheelCanvas() {
+      const container = document.getElementById('wheelContainer');
+      const canvas = document.getElementById('wheelCanvas');
+      if (!container || !canvas) return;
+      const size = container.clientWidth;
+      if (size === 0) return;
+
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = size * dpr;
+      canvas.height = size * dpr;
+      drawWheel();
+    }
+
+    function getSliceColor(item, index, total) {
+      // Paleta vibrante diferenciada por categoría y alternada
+      if (item.categoria === 'aplauso') {
+        return index % 2 === 0 ? '#4f46e5' : '#6366f1'; // Índigo / Violeta
+      }
+      if (item.categoria === 'dinamica') {
+        return index % 2 === 0 ? '#059669' : '#10b981'; // Esmeralda / Verde
+      }
+      return index % 2 === 0 ? '#d97706' : '#f59e0b'; // Ámbar / Naranja
+    }
+
+    function drawWheel() {
+      const canvas = document.getElementById('wheelCanvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const dpr = window.devicePixelRatio || 1;
+      const width = canvas.width / dpr;
+      const height = canvas.height / dpr;
+
+      ctx.save();
+      ctx.scale(dpr, dpr);
+      ctx.clearRect(0, 0, width, height);
+
+      const cx = width / 2;
+      const cy = height / 2;
+      const radius = Math.min(cx, cy) - 8;
+      const total = wheelItems.length;
+      if (total === 0) {
+        ctx.restore();
+        return;
+      }
+
+      const arc = (Math.PI * 2) / total;
+
+      // Borde exterior decorativo
+      ctx.beginPath();
+      ctx.arc(cx, cy, radius + 5, 0, Math.PI * 2);
+      ctx.fillStyle = '#1e293b';
+      ctx.fill();
+
+      for (let i = 0; i < total; i++) {
+        const item = wheelItems[i];
+        const startAngle = currentRotation + i * arc;
+        const endAngle = startAngle + arc;
+
+        // Gajo
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.arc(cx, cy, radius, startAngle, endAngle);
+        ctx.closePath();
+        ctx.fillStyle = getSliceColor(item, i, total);
+        ctx.fill();
+
+        // Línea divisoria
+        if (total <= 60) {
+          ctx.strokeStyle = 'rgba(255,255,255,0.35)';
+          ctx.lineWidth = total > 25 ? 0.8 : 1.8;
+          ctx.stroke();
+        }
+
+        // Texto dentro del gajo
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.rotate(startAngle + arc / 2);
+        ctx.textAlign = 'right';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = '#ffffff';
+
+        if (total <= 16) {
+          ctx.font = 'bold 12px Inter, sans-serif';
+          const label = `${item.icono} ${item.nombre}`;
+          const maxLen = 20;
+          const display = label.length > maxLen ? label.slice(0, maxLen - 1) + '…' : label;
+          ctx.fillText(display, radius - 16, 0);
+        } else if (total <= 55) {
+          ctx.font = 'bold 9.5px Inter, sans-serif';
+          const label = `#${item.numero} ${item.nombre}`;
+          const maxLen = 17;
+          const display = label.length > maxLen ? label.slice(0, maxLen - 1) + '…' : label;
+          ctx.fillText(display, radius - 12, 0);
+        } else {
+          // Modo 150 elementos: mostrar número compacto en el borde exterior
+          ctx.font = 'bold 7px Inter, sans-serif';
+          ctx.fillText(`${item.numero}`, radius - 8, 0);
+        }
+        ctx.restore();
+      }
+
+      // Aro interior sutil
+      ctx.beginPath();
+      ctx.arc(cx, cy, radius * 0.22, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(255,255,255,0.2)';
+      ctx.fill();
+
+      ctx.restore();
+    }
+
+    function getWinningIndex() {
+      const total = wheelItems.length;
+      const arc = (Math.PI * 2) / total;
+      // El puntero está arriba (-Math.PI / 2 o 3 * Math.PI / 2)
+      const pointerAngle = (Math.PI * 3) / 2;
+      const normalizedRot = ((currentRotation % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
+      const relativeAngle = (pointerAngle - normalizedRot + Math.PI * 2) % (Math.PI * 2);
+      return Math.floor(relativeAngle / arc) % total;
+    }
+
+    function spinWheel() {
+      if (isSpinning || wheelItems.length === 0) return;
+      getAudioCtx();
+      isSpinning = true;
+
+      const spinBtn = document.getElementById('spinBtn');
+      spinBtn.classList.add('opacity-75', 'cursor-not-allowed');
+
+      const extraSpins = 6 + Math.random() * 5; // entre 6 y 11 vueltas completas
+      const targetOffset = Math.random() * Math.PI * 2;
+      const startRotation = currentRotation;
+      const totalDelta = extraSpins * Math.PI * 2 + targetOffset;
+      const duration = 4200 + Math.random() * 800; // 4.2 a 5 seg
+      const startTime = performance.now();
+
+      function easeOutCubic(t) {
+        return 1 - Math.pow(1 - t, 3);
+      }
+
+      function animateSpin(now) {
+        const elapsed = now - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const eased = easeOutCubic(progress);
+
+        currentRotation = startRotation + totalDelta * eased;
+        drawWheel();
+
+        // Detectar cambio de gajo para sonido de tic y rebote del puntero
+        const currentIndex = getWinningIndex();
+        if (currentIndex !== lastSliceIndex) {
+          lastSliceIndex = currentIndex;
+          playTickSound();
+          const pointer = document.getElementById('wheelPointer');
+          pointer.classList.remove('pointer-tick');
+          void pointer.offsetWidth; // reflow
+          pointer.classList.add('pointer-tick');
+        }
+
+        if (progress < 1) {
+          requestAnimationFrame(animateSpin);
+        } else {
+          isSpinning = false;
+          spinBtn.classList.remove('opacity-75', 'cursor-not-allowed');
+          const winner = wheelItems[getWinningIndex()];
+          onWheelStop(winner);
+        }
+      }
+
+      requestAnimationFrame(animateSpin);
+    }
+
+    function onWheelStop(item) {
+      playWinFanfare();
+      launchConfetti();
+
+      // Guardar en historial
+      sessionHistory.unshift({
+        item,
+        time: new Date().toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' })
+      });
+      renderHistory();
+
+      // Mostrar tarjeta destacada al costado
+      const card = document.getElementById('lastWinnerCard');
+      card.classList.remove('hidden');
+
+      const catLabels = {
+        aplauso: '👏 Aplauso',
+        dinamica: '⚡ Dinámica',
+        juego: '🏆 Juego'
+      };
+      const catGradients = {
+        aplauso: 'from-indigo-600 via-violet-600 to-purple-700',
+        dinamica: 'from-emerald-600 via-teal-600 to-cyan-700',
+        juego: 'from-amber-500 via-orange-600 to-red-600'
+      };
+
+      card.className = `bg-gradient-to-br ${catGradients[item.categoria]} rounded-3xl shadow-md p-5 text-white space-y-3`;
+      document.getElementById('winnerCatBadge').textContent = catLabels[item.categoria];
+      document.getElementById('winnerNumBadge').textContent = `#${item.numero}`;
+      document.getElementById('winnerIcon').textContent = item.icono;
+      document.getElementById('winnerTitle').textContent = item.nombre;
+      document.getElementById('winnerObj').textContent = item.objetivo;
+
+      document.getElementById('winnerOpenModalBtn').onclick = () => openModal(item.id);
+      document.getElementById('winnerMarkDoneBtn').onclick = () => {
+        toggleCompleted(item.id);
+        showToast(completedIds.has(item.id) ? '✅ Marcada como realizada' : '↩️ Desmarcada');
+      };
+
+      // Abrir automáticamente el modal con la ficha ganadora
+      setTimeout(() => {
+        openModal(item.id);
+      }, 450);
+    }
+
+    function renderHistory() {
+      const list = document.getElementById('sessionHistoryList');
+      if (sessionHistory.length === 0) {
+        list.innerHTML = '<p class="text-xs text-slate-400 italic py-4 text-center">Aún no has girado la ruleta en esta sesión.</p>';
+        return;
+      }
+
+      const badgeStyles = {
+        aplauso: 'bg-indigo-100 text-indigo-700',
+        dinamica: 'bg-emerald-100 text-emerald-700',
+        juego: 'bg-amber-100 text-amber-700'
+      };
+
+      list.innerHTML = sessionHistory.map(entry => `
+        <div onclick="openModal('${entry.item.id}')" class="flex items-center justify-between p-2.5 rounded-2xl bg-slate-50 hover:bg-slate-100 border border-slate-200/60 cursor-pointer transition">
+          <div class="flex items-center gap-2.5 min-w-0">
+            <span class="text-lg">${entry.item.icono}</span>
+            <div class="truncate">
+              <p class="text-xs font-bold text-slate-800 truncate">${entry.item.nombre}</p>
+              <span class="inline-block text-[10px] font-bold px-2 py-0.5 rounded-full ${badgeStyles[entry.item.categoria]}">
+                ${entry.item.categoria.toUpperCase()} #${entry.item.numero}
+              </span>
+            </div>
+          </div>
+          <span class="text-[11px] font-medium text-slate-400 ml-2 shrink-0">${entry.time}</span>
+        </div>
+      `).join('');
+    }
+
+    function clearHistory() {
+      sessionHistory = [];
+      renderHistory();
+      showToast('Historial limpiado');
+    }
+
+    function exportSessionHistory() {
+      if (sessionHistory.length === 0) {
+        showToast('No hay actividades en el historial para exportar');
+        return;
+      }
+      const lines = sessionHistory.map((entry, idx) =>
+        `${idx + 1}. [${entry.time}] ${entry.item.categoria.toUpperCase()} #${entry.item.numero}: ${entry.item.nombre} — Objetivo: ${entry.item.objetivo}`
+      );
+      const text = `Historial de Sesión - Bitácora 2026:\n\n${lines.join('\n')}`;
+      const tempArea = document.createElement('textarea');
+      tempArea.value = text;
+      document.body.appendChild(tempArea);
+      tempArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(tempArea);
+      showToast('📋 Historial copiado al portapapeles');
+    }
+
+    // =========================================================================
+    // CATÁLOGO EXPLORADOR (150 FICHAS)
+    // =========================================================================
+    function setCatFilter(cat) {
+      currentCatFilter = cat;
+      const styles = {
+        all: ['bg-slate-900 text-white', 'bg-slate-100 text-slate-700 hover:bg-slate-200'],
+        aplauso: ['bg-indigo-600 text-white', 'bg-indigo-50 text-indigo-700 hover:bg-indigo-100'],
+        dinamica: ['bg-emerald-600 text-white', 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'],
+        juego: ['bg-amber-500 text-white', 'bg-amber-50 text-amber-700 hover:bg-amber-100']
+      };
+
+      ['all', 'aplauso', 'dinamica', 'juego'].forEach(c => {
+        const btn = document.getElementById(`catFilter-${c}`);
+        btn.className = `cat-filter-btn px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-bold transition ${c === cat ? styles[c][0] : styles[c][1]}`;
+      });
+
+      const gtBar = document.getElementById('gameTypeFilterBar');
+      if (cat === 'juego') {
+        gtBar.classList.remove('hidden');
+        gtBar.classList.add('flex');
+      } else {
+        gtBar.classList.add('hidden');
+        gtBar.classList.remove('flex');
+        currentGameTypeFilter = 'all';
+        currentGameValueFilter = 'all';
+        const valSel = document.getElementById('gameValueFilterSelect');
+        if (valSel) valSel.value = 'all';
+      }
+
+      renderCatalog();
+    }
+
+    function setGameTypeFilter(gt) {
+      currentGameTypeFilter = gt;
+      ['all', 'I-I', 'I-G', 'G-G', 'E-E'].forEach(type => {
+        const btn = document.getElementById(`gt-${type}`);
+        if (btn) {
+          btn.className = `gt-btn px-2.5 py-1 rounded-xl text-xs font-bold transition ${
+            type === gt ? 'bg-amber-500 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+          }`;
+        }
+      });
+      renderCatalog();
+    }
+
+    function setGameValueFilter(val) {
+      currentGameValueFilter = val;
+      renderCatalog();
+    }
+
+    function toggleOnlyFavoritesFilter() {
+      onlyFavoritesFilter = !onlyFavoritesFilter;
+      const btn = document.getElementById('onlyFavFilterBtn');
+      btn.className = onlyFavoritesFilter
+        ? 'px-3 py-1.5 rounded-xl text-xs font-bold bg-amber-400 text-slate-900 shadow-sm transition'
+        : 'px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600 hover:bg-amber-100 hover:text-amber-800 transition';
+      renderCatalog();
+    }
+
+    function renderCatalog() {
+      const query = (document.getElementById('searchInput').value || '').toLowerCase().trim();
+      const grid = document.getElementById('catalogGrid');
+
+      const filtered = BITACORA_DATA.filter(item => {
+        if (currentCatFilter !== 'all' && item.categoria !== currentCatFilter) return false;
+        if (currentCatFilter === 'juego' && currentGameTypeFilter !== 'all' && item.tipo !== currentGameTypeFilter) return false;
+        if (currentCatFilter === 'juego' && currentGameValueFilter !== 'all') {
+          const valStr = (item.valor || '').toLowerCase();
+          if (!valStr.includes(currentGameValueFilter)) return false;
+        }
+        if (onlyFavoritesFilter && !favoriteIds.has(item.id)) return false;
+
+        if (query) {
+          const text = `${item.nombre} ${item.objetivo} ${item.descripcion} ${item.valor || ''} ${item.tipo || ''}`.toLowerCase();
+          return text.includes(query);
+        }
+        return true;
+      });
+
+      document.getElementById('catalogCountLabel').textContent = `Mostrando ${filtered.length} de 150 fichas`;
+
+      if (filtered.length === 0) {
+        grid.innerHTML = `
+          <div class="col-span-full bg-white rounded-3xl p-10 text-center border border-slate-200">
+            <p class="text-3xl mb-2">🔍</p>
+            <h3 class="text-base font-extrabold text-slate-800">No se encontraron fichas</h3>
+            <p class="text-xs text-slate-500 mt-1">Intenta cambiar los filtros o buscar con otra palabra clave.</p>
+          </div>
+        `;
+        return;
+      }
+
+      const catMeta = {
+        aplauso: { label: 'Aplauso', badge: 'bg-indigo-100 text-indigo-700', border: 'hover:border-indigo-300' },
+        dinamica: { label: 'Dinámica', badge: 'bg-emerald-100 text-emerald-700', border: 'hover:border-emerald-300' },
+        juego: { label: 'Juego', badge: 'bg-amber-100 text-amber-800', border: 'hover:border-amber-300' }
+      };
+
+      grid.innerHTML = filtered.map(item => {
+        const meta = catMeta[item.categoria];
+        const isDone = completedIds.has(item.id);
+        const isFav = favoriteIds.has(item.id);
+
+        return `
+          <article class="bg-white rounded-3xl p-5 border border-slate-200/80 ${meta.border} shadow-sm hover:shadow-md transition flex flex-col justify-between gap-4">
+            <div>
+              <div class="flex items-center justify-between gap-2 mb-3">
+                <span class="px-2.5 py-1 rounded-full text-[11px] font-extrabold uppercase tracking-wide ${meta.badge}">
+                  ${meta.label} #${item.numero}
+                </span>
+                <div class="flex items-center gap-1.5">
+                  ${item.tipo ? `<span class="px-2 py-0.5 rounded-lg bg-slate-100 text-slate-600 text-[11px] font-bold">${item.tipo}</span>` : ''}
+                  <button onclick="toggleFavorite('${item.id}')" class="p-1.5 rounded-xl ${isFav ? 'bg-amber-100 text-amber-500' : 'bg-slate-50 text-slate-400 hover:text-amber-500'} transition" title="Añadir a Mi Lista">
+                    ${isFav ? '⭐' : '☆'}
+                  </button>
+                  <button onclick="toggleCompleted('${item.id}')" class="p-1.5 rounded-xl ${isDone ? 'bg-emerald-100 text-emerald-600' : 'bg-slate-50 text-slate-400 hover:text-emerald-600'} transition" title="Marcar como realizada">
+                    ${isDone ? '✅' : '☑️'}
+                  </button>
+                </div>
+              </div>
+
+              <div onclick="openModal('${item.id}')" class="cursor-pointer group">
+                <div class="flex items-center gap-3 mb-2">
+                  <span class="text-3xl bg-slate-50 p-2 rounded-2xl border border-slate-100 group-hover:scale-105 transition">${item.icono}</span>
+                  <h3 class="text-base font-extrabold text-slate-900 group-hover:text-indigo-600 transition leading-snug">
+                    ${item.nombre}
+                  </h3>
+                </div>
+                <p class="text-xs font-semibold text-slate-500 line-clamp-2 mb-2">
+                  🎯 ${item.objetivo}
+                </p>
+                <p class="text-xs text-slate-600 line-clamp-3 leading-relaxed">
+                  ${item.descripcion}
+                </p>
+              </div>
+            </div>
+
+            <div class="pt-2 border-t border-slate-100 flex items-center justify-between">
+              <button onclick="openModal('${item.id}')" class="text-xs font-extrabold text-indigo-600 hover:text-indigo-800 transition">
+                Ver ficha completa →
+              </button>
+              ${item.videoUrl ? '<span class="text-[11px] font-bold text-rose-600">▶️ Video</span>' : ''}
+            </div>
+          </article>
+        `;
+      }).join('');
+    }
+
+    function toggleCompleted(id) {
+      if (completedIds.has(id)) {
+        completedIds.delete(id);
+      } else {
+        completedIds.add(id);
+      }
+      updateStats();
+      if (currentModalItem && currentModalItem.id === id) syncModalButtons(currentModalItem);
+      if (!document.getElementById('view-catalogo').classList.contains('hidden')) renderCatalog();
+    }
+
+    function toggleFavorite(id) {
+      if (favoriteIds.has(id)) {
+        favoriteIds.delete(id);
+        showToast('Quitada de Mi Lista');
+      } else {
+        favoriteIds.add(id);
+        showToast('⭐ Añadida a Mi Lista');
+      }
+      updateStats();
+      if (currentModalItem && currentModalItem.id === id) syncModalButtons(currentModalItem);
+      if (!document.getElementById('view-catalogo').classList.contains('hidden')) renderCatalog();
+      if (document.getElementById('wheelModeSelect').value === 'favorites') changeWheelMode();
+    }
+
+    // =========================================================================
+    // MODAL DETALLE DE FICHA + ILUSTRACIONES SVG TEMÁTICAS
+    // =========================================================================
+    function getCategorySvgIllustration(categoria) {
+      if (categoria === 'aplauso') {
+        return `<svg width="96" height="96" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M25 60 C25 45, 45 45, 45 60 L45 80 C45 88, 25 88, 25 80 Z"/>
+          <path d="M55 55 C55 40, 75 40, 75 55 L75 75 C75 83, 55 83, 55 75 Z"/>
+          <path d="M50 15 L50 28 M32 22 L40 32 M68 22 L60 32"/>
+        </svg>`;
+      }
+      if (categoria === 'dinamica') {
+        return `<svg width="96" height="96" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="50" cy="50" r="32" stroke-dasharray="10 8"/>
+          <circle cx="50" cy="18" r="6" fill="currentColor"/>
+          <circle cx="82" cy="50" r="6" fill="currentColor"/>
+          <circle cx="50" cy="82" r="6" fill="currentColor"/>
+          <circle cx="18" cy="50" r="6" fill="currentColor"/>
+        </svg>`;
+      }
+      return `<svg width="96" height="96" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M30 22 H70 V45 C70 60, 58 68, 50 68 C42 68, 30 60, 30 45 Z"/>
+        <path d="M30 30 H18 C18 44, 24 50, 30 50"/>
+        <path d="M70 30 H82 C82 44, 76 50, 70 50"/>
+        <path d="M50 68 V82 M35 82 H65"/>
+      </svg>`;
+    }
+
+    function openModal(id) {
+      const item = BITACORA_DATA.find(x => x.id === id);
+      if (!item) return;
+      currentModalItem = item;
+
+      const banners = {
+        aplauso: 'from-indigo-600 to-violet-600',
+        dinamica: 'from-emerald-600 to-teal-600',
+        juego: 'from-amber-500 to-orange-600'
+      };
+      const catNames = {
+        aplauso: '👏 Aplauso',
+        dinamica: '⚡ Dinámica',
+        juego: '🏆 Juego'
+      };
+
+      const banner = document.getElementById('modalHeaderBanner');
+      banner.className = `p-6 text-white bg-gradient-to-r ${banners[item.categoria]} relative overflow-hidden`;
+      document.getElementById('modalSvgIllustration').innerHTML = getCategorySvgIllustration(item.categoria);
+      document.getElementById('modalCategoryBadge').textContent = `${catNames[item.categoria]} #${item.numero}`;
+      document.getElementById('modalIcon').textContent = item.icono;
+      document.getElementById('modalTitle').textContent = item.nombre;
+      document.getElementById('modalObjetivo').textContent = item.objetivo;
+      document.getElementById('modalDescripcion').textContent = item.descripcion;
+
+      // Campos exclusivos de Juegos
+      const gameExtra = document.getElementById('modalGameExtra');
+      if (item.categoria === 'juego') {
+        gameExtra.classList.remove('hidden');
+        document.getElementById('modalValor').textContent = item.valor || 'Físico-Social';
+        document.getElementById('modalTipo').textContent = item.tipo || 'E-E';
+      } else {
+        gameExtra.classList.add('hidden');
+      }
+
+      // Enlace YouTube si existe
+      const videoBox = document.getElementById('modalVideoBox');
+      if (item.videoUrl) {
+        videoBox.classList.remove('hidden');
+        document.getElementById('modalVideoLink').href = item.videoUrl;
+      } else {
+        videoBox.classList.add('hidden');
+      }
+
+      syncModalButtons(item);
+
+      const modal = document.getElementById('itemModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function syncModalButtons(item) {
+      const doneBtn = document.getElementById('modalToggleDoneBtn');
+      const favBtn = document.getElementById('modalToggleFavBtn');
+
+      const isDone = completedIds.has(item.id);
+      doneBtn.className = isDone
+        ? 'px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition flex items-center gap-1.5 bg-emerald-600 text-white shadow-sm'
+        : 'px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition flex items-center gap-1.5 bg-slate-200 hover:bg-slate-300 text-slate-700';
+      doneBtn.textContent = isDone ? '✅ Realizada' : '☑️ Marcar Realizada';
+      doneBtn.onclick = () => toggleCompleted(item.id);
+
+      const isFav = favoriteIds.has(item.id);
+      favBtn.className = isFav
+        ? 'px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition flex items-center gap-1.5 bg-amber-400 text-slate-900 shadow-sm'
+        : 'px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition flex items-center gap-1.5 bg-slate-200 hover:bg-slate-300 text-slate-700';
+      favBtn.textContent = isFav ? '⭐ En Mi Lista' : '☆ Añadir a Mi Lista';
+      favBtn.onclick = () => toggleFavorite(item.id);
+    }
+
+    function closeModal() {
+      const modal = document.getElementById('itemModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+      currentModalItem = null;
+    }
+
+    // =========================================================================
+    // REFLEXIONES DEL GRUPO
+    // =========================================================================
+    function renderReflections() {
+      const grid = document.getElementById('reflectionsGrid');
+      const avatars = ['🧑‍🎓', '👩‍🎓', '👩‍💻', '🌟', '💡', '🎯'];
+      const defaultIds = new Set(DEFAULT_REFLECTIONS.map(r => r.id));
+
+      grid.innerHTML = reflectionsList.map((ref, idx) => {
+        const isCustom = !defaultIds.has(ref.id);
+        return `
+          <div class="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm flex flex-col justify-between gap-4">
+            <div>
+              <div class="flex items-center justify-between gap-3 mb-4">
+                <div class="flex items-center gap-3">
+                  <div class="w-12 h-12 rounded-2xl bg-indigo-50 text-2xl flex items-center justify-center border border-indigo-100">
+                    ${avatars[idx % avatars.length]}
+                  </div>
+                  <div>
+                    <h3 class="text-base font-extrabold text-slate-900">${ref.nombre}</h3>
+                    <span class="text-xs font-semibold text-indigo-600">${ref.rol || 'Integrante del Grupo'}</span>
+                  </div>
+                </div>
+                ${isCustom ? `<button onclick="deleteReflection('${ref.id}')" class="text-xs font-bold text-rose-500 hover:text-rose-700 px-2 py-1 rounded-lg hover:bg-rose-50">Eliminar</button>` : ''}
+              </div>
+              <blockquote class="text-sm text-slate-700 leading-relaxed italic border-l-4 border-indigo-400 pl-4">
+                "${ref.texto}"
+              </blockquote>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function openAddReflectionModal() {
+      document.getElementById('refNameInput').value = '';
+      document.getElementById('refTextInput').value = '';
+      const modal = document.getElementById('reflectionModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeReflectionModal() {
+      const modal = document.getElementById('reflectionModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function saveNewReflection(e) {
+      e.preventDefault();
+      const nombre = document.getElementById('refNameInput').value.trim();
+      const texto = document.getElementById('refTextInput').value.trim();
+      if (!nombre || !texto) return;
+
+      reflectionsList.push({
+        id: 'ref-' + Date.now(),
+        nombre,
+        rol: 'Integrante del Grupo',
+        texto
+      });
+      localStorage.setItem('bitacora2026_reflections', JSON.stringify(reflectionsList));
+      closeReflectionModal();
+      renderReflections();
+      showToast('✅ Reflexión agregada correctamente');
+    }
+
+    function deleteReflection(id) {
+      reflectionsList = reflectionsList.filter(r => r.id !== id);
+      localStorage.setItem('bitacora2026_reflections', JSON.stringify(reflectionsList));
+      renderReflections();
+      showToast('Reflexión eliminada');
+    }
+
+    function exportReflections() {
+      const text = reflectionsList.map(r => `Integrante: ${r.nombre}\nReflexión:\n${r.texto}\n`).join('\n-------------------\n\n');
+      const tempArea = document.createElement('textarea');
+      tempArea.value = text;
+      document.body.appendChild(tempArea);
+      tempArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(tempArea);
+      showToast('📋 Todas las reflexiones copiadas al portapapeles');
+    }
+
+    // =========================================================================
+    // EVENTOS GLOBALES E INICIALIZACIÓN
+    // =========================================================================
+    window.addEventListener('resize', () => {
+      if (!document.getElementById('view-ruleta').classList.contains('hidden')) {
+        resizeWheelCanvas();
+      }
+    });
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeModal();
+        closeReflectionModal();
+      }
+      if (e.code === 'Space' && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
+        if (!document.getElementById('view-ruleta').classList.contains('hidden') && document.getElementById('itemModal').classList.contains('hidden')) {
+          e.preventDefault();
+          spinWheel();
+        }
+      }
+    });
+
+    document.getElementById('itemModal').addEventListener('click', (e) => {
+      if (e.target.id === 'itemModal') closeModal();
+    });
+
+    document.getElementById('reflectionModal').addEventListener('click', (e) => {
+      if (e.target.id === 'reflectionModal') closeReflectionModal();
+    });
+
+    window.onload = function () {
+      updateStats();
+      changeWheelMode();
+      resizeWheelCanvas();
+      renderReflections();
+    };
+  </script>
+</body>
+</html>
